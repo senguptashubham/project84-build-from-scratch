@@ -60,7 +60,7 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 
 ## Sprint 1 · Days 1–14 · NumPy and data fluency
 
-- [ ] **S1.01 · Pairwise distances without loops.** Given `X` of shape `(n, d)` and `Y` of shape `(m, d)`, return an `(n, m)` matrix of Euclidean distances using broadcasting only. Then do it again using the identity ‖x−y‖² = ‖x‖² + ‖y‖² − 2x·y. Clip tiny negatives to zero before the square root. *Test:* both match `scipy.spatial.distance.cdist` to 1e-6 on random data; explain in a comment why the second version is faster and where it can go numerically wrong.
+- [X] **S1.01 · Pairwise distances without loops.** Given `X` of shape `(n, d)` and `Y` of shape `(m, d)`, return an `(n, m)` matrix of Euclidean distances using broadcasting only. Then do it again using the identity ‖x−y‖² = ‖x‖² + ‖y‖² − 2x·y. Clip tiny negatives to zero before the square root. *Test:* both match `scipy.spatial.distance.cdist` to 1e-6 on random data; explain in a comment why the second version is faster and where it can go numerically wrong.
 
 - [ ] **S1.02 · Numerically stable activations.** Write `sigmoid(z)`, `softmax(z, axis)` and `logsumexp(z, axis)` that do not overflow for inputs like `[1000, 1001, 1002]` or `[-1000, 0]`. Softmax must work along any axis of a 2D array. *Test:* no `inf`/`nan` on extreme inputs; softmax sums to 1 along the chosen axis; matches `scipy.special.expit`, `softmax` and `logsumexp`.
 
