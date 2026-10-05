@@ -62,7 +62,7 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 
 - [X] **S1.01 · Pairwise distances without loops.** Given `X` of shape `(n, d)` and `Y` of shape `(m, d)`, return an `(n, m)` matrix of Euclidean distances using broadcasting only. Then do it again using the identity ‖x−y‖² = ‖x‖² + ‖y‖² − 2x·y. Clip tiny negatives to zero before the square root. *Test:* both match `scipy.spatial.distance.cdist` to 1e-6 on random data; explain in a comment why the second version is faster and where it can go numerically wrong.
 
-- [ ] **S1.02 · Numerically stable activations.** Write `sigmoid(z)`, `softmax(z, axis)` and `logsumexp(z, axis)` that do not overflow for inputs like `[1000, 1001, 1002]` or `[-1000, 0]`. Softmax must work along any axis of a 2D array. *Test:* no `inf`/`nan` on extreme inputs; softmax sums to 1 along the chosen axis; matches `scipy.special.expit`, `softmax` and `logsumexp`.
+- [X] **S1.02 · Numerically stable activations.** Write `sigmoid(z)`, `softmax(z, axis)` and `logsumexp(z, axis)` that do not overflow for inputs like `[1000, 1001, 1002]` or `[-1000, 0]`. Softmax must work along any axis of a 2D array. *Test:* no `inf`/`nan` on extreme inputs; softmax sums to 1 along the chosen axis; matches `scipy.special.expit`, `softmax` and `logsumexp`.
 
 - [ ] **S1.03 · Data splits.** Write `train_val_test_split(X, y, ratios=(0.7, 0.15, 0.15), seed)` that shuffles reproducibly. Then write a stratified version that preserves class proportions in each split. *Test:* the same seed gives identical splits; on 1,000 samples with a 90/10 label split, class proportions in every split are within 1 percentage point of the original.
 
