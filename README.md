@@ -64,7 +64,7 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 
 - [X] **S1.02 · Numerically stable activations.** Write `sigmoid(z)`, `softmax(z, axis)` and `logsumexp(z, axis)` that do not overflow for inputs like `[1000, 1001, 1002]` or `[-1000, 0]`. Softmax must work along any axis of a 2D array. *Test:* no `inf`/`nan` on extreme inputs; softmax sums to 1 along the chosen axis; matches `scipy.special.expit`, `softmax` and `logsumexp`.
 
-- [ ] **S1.03 · Data splits.** Write `train_val_test_split(X, y, ratios=(0.7, 0.15, 0.15), seed)` that shuffles reproducibly. Then write a stratified version that preserves class proportions in each split. *Test:* the same seed gives identical splits; on 1,000 samples with a 90/10 label split, class proportions in every split are within 1 percentage point of the original.
+- [X] **S1.03 · Data splits.** Write `train_val_test_split(X, y, ratios=(0.7, 0.15, 0.15), seed)` that shuffles reproducibly. Then write a stratified version that preserves class proportions in each split. *Test:* the same seed gives identical splits; on 1,000 samples with a 90/10 label split, class proportions in every split are within 1 percentage point of the original.
 
 - [ ] **S1.04 · k-fold cross-validation.** Write a generator `kfold(n, k, shuffle, seed)` yielding `(train_idx, val_idx)` pairs. Every index must appear in exactly one validation fold. Then write `cross_val_score(model_fn, X, y, k, metric)` that trains a fresh model per fold and returns the per-fold scores. *Test:* fold union equals all indices; folds are disjoint; sizes differ by at most one; `cross_val_score` runs with a trivial mean-predicting model.
 
