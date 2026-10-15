@@ -11,6 +11,5 @@ __pycache__/
 venv/
 
 # Editors / OS
-.vscode/
 .idea/
 .DS_Store

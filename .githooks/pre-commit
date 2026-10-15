@@ -1,0 +1,14 @@
+#!/bin/sh
+# Refresh README.md from the trackers and stage it; block the commit if the trackers disagree with the sequence.
+# Enabled by `python bootstrap.py` (sets core.hooksPath to .githooks).
+cd "$(git rev-parse --show-toplevel)" || exit 1
+py=
+for c in python python3 py; do
+  if command -v "$c" >/dev/null 2>&1; then py=$c; break; fi
+done
+if [ -z "$py" ]; then
+  echo "pre-commit: no python found on PATH; cannot refresh README.md. Commit aborted."
+  exit 1
+fi
+"$py" master.py || { echo "pre-commit: master.py found problems; commit aborted."; exit 1; }
+git add README.md

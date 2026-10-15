@@ -3,10 +3,8 @@
 from sprint1_numpy_data_fluency.s1_04_kfold_cv import *
 import numpy as np
 import logging
-from sklearn.datasets import fetch_california_housing
 
 LOGGER = logging.getLogger(__name__)
-X, y = fetch_california_housing(return_X_y=True)
 
 class MeanModel:
   def fit(self, X, y):
