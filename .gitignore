@@ -13,3 +13,7 @@ venv/
 # Editors / OS
 .idea/
 .DS_Store
+
+# Obsedian
+.obsidian/
+.trash/

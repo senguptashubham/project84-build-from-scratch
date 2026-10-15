@@ -116,6 +116,7 @@ code/
     rewrites/
 theory/
     THEORY_README.md     theory tracker
+    notes/               M0-math.md ... M8-llm-systems-evaluation.md
     cheatsheets/         M0.md ... M8.md, ALL.md
     qa/                  M0.md ... M8.md
 derivation/
