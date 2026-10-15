@@ -43,6 +43,7 @@ Not needed: more than one textbook per topic, CS336 (dropped), a second LLM cour
 
 ```
 theory/
+  notes/M0-math.md ... M8-llm-systems-evaluation.md (reading notes, one per module)
   cheatsheets/M0.md ... M8.md, ALL.md
   qa/M0.md ... M8.md
   log.md
