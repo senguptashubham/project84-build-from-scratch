@@ -34,7 +34,7 @@ Not needed: more than one textbook per topic, CS336 (dropped), a second LLM cour
 
 1. **Intuition first.** Before any formula, write one plain-language sentence for what it does and why you would care.
 2. **Name the faked step.** For every derivation and every formula on a sheet, write the step people usually skip.
-3. **Sheet from memory.** At the end of each module, write the cheat sheet blank-page first. Only then compare with the source and fix gaps in a different colour or marker.
+3. **Sheet from memory.** At the end of each module, write the cheat sheet blank-page first. Only then compare with the source and fix gaps in a different colour or marker. For each *method* on the sheet (an algorithm or model, not a math fact), write three short bullets on when it fails or misleads before you summarize how it works. Keep it to three so the sheet still fits on one page. If a row arrives after its module's sheet (for example T4.5, T7.4 or T8.9), add its block to that sheet, and its questions to the module's Q&A, when you do the row.
 4. **Answer aloud.** Say each Q&A answer out loud in two minutes or less before writing it.
 5. **No copying code.** Theory checks that need code are a few lines of NumPy that you write yourself.
 6. **One commit per module.** The sheet and Q&A for that module go in together, with a message such as `T3.S: cheat sheet M3`.
@@ -43,7 +43,7 @@ Not needed: more than one textbook per topic, CS336 (dropped), a second LLM cour
 
 ```
 theory/
-  notes/M0-math.md ... M8-llm-systems-evaluation.md (reading notes, one per module)
+  notes/<area>/<chapter>.md   reading notes by chapter, in five areas (see "Where the notes go")
   cheatsheets/M0.md ... M8.md, ALL.md
   qa/M0.md ... M8.md
   log.md
@@ -51,23 +51,67 @@ theory/
 
 (`ALL.md` is the merged four-page sheet from M9. It is not the sequence file `README.md`.)
 
+## Where the notes go
+
+Notes are grouped by chapter, not by module, so each file reads as one topic. The cheat sheets and Q&A stay per module. The folder numbers set the order (foundations first). Each note file carries a `tags:` line with its area name, without the number, which Obsidian reads as a tag. T7.6 and the M9 rows have no notes file; notes from T7.6 go into the chapter the topic belongs to.
+
+| Area | Chapter | Rows |
+| --- | --- | --- |
+| 01-foundations | [bias-variance-and-validation](notes/01-foundations/bias-variance-and-validation.md) | T1.2 |
+| 01-foundations | [calculus](notes/01-foundations/calculus.md) | T0.3 |
+| 01-foundations | [estimation](notes/01-foundations/estimation.md) | T0.4, T1.1 |
+| 01-foundations | [information-theory](notes/01-foundations/information-theory.md) | T1.3 |
+| 01-foundations | [linear-algebra](notes/01-foundations/linear-algebra.md) | T0.2 |
+| 01-foundations | [optimization](notes/01-foundations/optimization.md) | T2.1, T5.3 |
+| 01-foundations | [probability](notes/01-foundations/probability.md) | T0.1 |
+| 01-foundations | [regularization](notes/01-foundations/regularization.md) | T2.2 |
+| 01-foundations | [statistical-inference](notes/01-foundations/statistical-inference.md) | T1.4 |
+| 02-classical-ml | [clustering](notes/02-classical-ml/clustering.md) | T4.1 |
+| 02-classical-ml | [em-and-latent-variables](notes/02-classical-ml/em-and-latent-variables.md) | T4.3 |
+| 02-classical-ml | [evaluation-metrics](notes/02-classical-ml/evaluation-metrics.md) | T3.6 |
+| 02-classical-ml | [logistic-regression](notes/02-classical-ml/logistic-regression.md) | T3.1 |
+| 02-classical-ml | [naive-bayes-and-knn](notes/02-classical-ml/naive-bayes-and-knn.md) | T3.2 |
+| 02-classical-ml | [pca-svd-and-matrix-factorization](notes/02-classical-ml/pca-svd-and-matrix-factorization.md) | T4.2, T4.4 |
+| 02-classical-ml | [svm-and-kernels](notes/02-classical-ml/svm-and-kernels.md) | T3.5 |
+| 02-classical-ml | [trees-and-ensembles](notes/02-classical-ml/trees-and-ensembles.md) | T3.3, T3.4 |
+| 03-deep-learning | [cnns](notes/03-deep-learning/cnns.md) | T5.4 |
+| 03-deep-learning | [neural-networks-and-backprop](notes/03-deep-learning/neural-networks-and-backprop.md) | T5.1, T5.2 |
+| 03-deep-learning | [rnns-and-lstms](notes/03-deep-learning/rnns-and-lstms.md) | T5.5 |
+| 03-deep-learning | [training-at-scale](notes/03-deep-learning/training-at-scale.md) | T5.6 |
+| 04-transformers-and-llms | [adaptation-and-lora](notes/04-transformers-and-llms/adaptation-and-lora.md) | T7.3 |
+| 04-transformers-and-llms | [alignment](notes/04-transformers-and-llms/alignment.md) | T7.4 |
+| 04-transformers-and-llms | [attention-and-transformer](notes/04-transformers-and-llms/attention-and-transformer.md) | T6.1, T6.2 |
+| 04-transformers-and-llms | [decoding](notes/04-transformers-and-llms/decoding.md) | T7.2 |
+| 04-transformers-and-llms | [efficient-attention](notes/04-transformers-and-llms/efficient-attention.md) | T6.6 |
+| 04-transformers-and-llms | [embeddings-and-contrastive-learning](notes/04-transformers-and-llms/embeddings-and-contrastive-learning.md) | T4.5 |
+| 04-transformers-and-llms | [karpathy-build-gpt](notes/04-transformers-and-llms/karpathy-build-gpt.md) | T6.4 |
+| 04-transformers-and-llms | [pretraining-and-scaling](notes/04-transformers-and-llms/pretraining-and-scaling.md) | T7.1, T7.5 |
+| 04-transformers-and-llms | [tokenization](notes/04-transformers-and-llms/tokenization.md) | T6.3, T6.5 |
+| 05-llm-systems | [agents-and-tool-use](notes/05-llm-systems/agents-and-tool-use.md) | T8.4 |
+| 05-llm-systems | [hallucination-and-safety](notes/05-llm-systems/hallucination-and-safety.md) | T8.7 |
+| 05-llm-systems | [inference-and-serving](notes/05-llm-systems/inference-and-serving.md) | T8.1, T8.9 |
+| 05-llm-systems | [llm-evaluation](notes/05-llm-systems/llm-evaluation.md) | T7.7, T8.3 |
+| 05-llm-systems | [retrieval-and-rag](notes/05-llm-systems/retrieval-and-rag.md) | T8.2, T8.6 |
+| 05-llm-systems | [shipping-ml-models](notes/05-llm-systems/shipping-ml-models.md) | T8.8 |
+| 05-llm-systems | [trending-topics](notes/05-llm-systems/trending-topics.md) | T8.5 |
+
 ## Load
 
-About 101 hours including 9.5 hours of optional rows (91.5 hours required). The 13.5 hours of derivations are in `derivation/DERIVATION_README.md`, not here.
+About 118 hours including 6 hours of optional rows (112 hours required). The 13.5 hours of derivations are in `derivation/DERIVATION_README.md`, not here.
 
 | Module | Topic | Required | Optional | Total |
 | --- | --- | --- | --- | --- |
 | M0 | Math you will use | 9 h | 0 | 9 h |
-| M1 | Estimation, bias-variance, information, priors | 8 h | 0 | 8 h |
+| M1 | Estimation, inference, bias-variance, information, priors | 10.5 h | 0 | 10.5 h |
 | M2 | Optimization and regularization | 6 h | 0 | 6 h |
-| M3 | Classical supervised learning and evaluation | 12 h | 1 h | 13 h |
-| M4 | Unsupervised learning, PCA and EM | 8 h | 0 | 8 h |
-| M5 | Neural nets, backprop and training | 10 h | 1 h | 11 h |
-| M6 | Attention and the Transformer | 11 h | 2 h | 13 h |
-| M7 | LLMs: pretraining to alignment | 11.5 h | 2 h | 13.5 h |
-| M8 | LLM systems, applications and evaluation | 10 h | 3.5 h | 13.5 h |
+| M3 | Classical supervised learning and evaluation | 13 h | 0 | 13 h |
+| M4 | Unsupervised learning, PCA, EM and embeddings | 11.5 h | 0 | 11.5 h |
+| M5 | Neural nets, backprop and training | 12.5 h | 0 | 12.5 h |
+| M6 | Attention and the Transformer | 13 h | 2 h | 15 h |
+| M7 | LLMs: pretraining to alignment | 12.5 h | 2 h | 14.5 h |
+| M8 | LLM systems, applications and evaluation | 18 h | 2 h | 20 h |
 | M9 | Consolidation | 6 h | 0 | 6 h |
-| | | **91.5 h** | **9.5 h** | **101 h** |
+| | | **112 h** | **6 h** | **118 h** |
 
 **Calibrate.** After M1, compare real hours with the table. If you ran 1.5 times over, scale the later modules and start using the cut order early.
 
@@ -91,15 +135,16 @@ About 101 hours including 9.5 hours of optional rows (91.5 hours required). The 
 
 ---
 
-## M1. Estimation, bias-variance, information and priors
+## M1. Estimation, inference, bias-variance, information and priors
 
-**Related:** S1.14, S1.15; derivations D02, D04, D05, D10.
+**Related:** S1.03, S1.04, S1.13 to S1.16, S7.03; derivations D02, D04, D05, D10.
 
 - [ ] **T1.1 · Maximum likelihood, MAP and priors.** `2 h` MLE and MAP, and what a prior means; ridge as a Gaussian prior and lasso as a Laplace prior. Murphy Ch. 4.
-- [ ] **T1.2 · Bias, variance and validation.** `2 h` Bias, variance and noise; underfitting versus overfitting; train, validation and test splits; cross-validation. Shervine *Tips and Tricks* for the vocabulary.
+- [ ] **T1.2 · Bias, variance and validation.** `2.5 h` Bias, variance and noise; underfitting versus overfitting; train, validation and test splits; cross-validation; learning curves; grid and random hyperparameter search. Shervine *Tips and Tricks* for the vocabulary.
 - [ ] **T1.3 · Information theory.** `2 h` Entropy, cross-entropy, KL divergence, mutual information (briefly). Murphy Ch. 6.
-- [ ] **T1.S · Cheat sheet M1.** `1 h` The MLE recipe in four lines; the normal equations and when `XᵀX` is invertible; the bias-variance formula and its faked step; the cross-entropy, KL and NLL identity; MLE, MAP and Bayesian estimation in one line each.
-- [ ] **T1.Q · Q&A M1.** `1 h` Huyen's statistics and ML basics sections. Include "why squared error?", "why log-likelihood?" and "explain bias-variance with an example".
+- [ ] **T1.4 · Confidence intervals, bootstrap and hypothesis tests.** `2 h` Sampling distributions and the standard error; confidence intervals and what they do and do not mean; the bootstrap; hypothesis tests, p-values and the two error types; the permutation test; the two-proportion z-test; statistical power, effect size and sample size; multiple comparisons, and why peeking at an A/B test inflates false positives. Murphy Ch. 4, selectively; Shervine *Probability and Statistics*.
+- [ ] **T1.S · Cheat sheet M1.** `1 h` The MLE recipe in four lines; the normal equations and when `XᵀX` is invertible; the bias-variance formula and its faked step; the cross-entropy, KL and NLL identity; MLE, MAP and Bayesian estimation in one line each; the bootstrap and hypothesis-test recipes, with the peeking warning.
+- [ ] **T1.Q · Q&A M1.** `1 h` Huyen's statistics and ML basics sections. Include "why squared error?", "why log-likelihood?" and "explain bias-variance with an example", "what does a 95% confidence interval mean?" and "why does peeking break an A/B test?".
 
 ---
 
@@ -107,7 +152,7 @@ About 101 hours including 9.5 hours of optional rows (91.5 hours required). The 
 
 **Related:** S2.01, S2.02, S3.09, S7.05; derivation D05.
 
-- [ ] **T2.1 · Gradient descent and its variants.** `2.5 h` Convexity and why it matters; gradient descent, learning rate, stochastic and mini-batch gradient descent; momentum; conditioning and why scaling features helps. Murphy Ch. 8, selectively.
+- [ ] **T2.1 · Gradient descent and its variants.** `2.5 h` Convexity and why it matters; gradient descent, learning rate, stochastic and mini-batch gradient descent; momentum; conditioning and why scaling features helps. Newton's method in one paragraph (the second-order step that IRLS in Sprint 7 uses). Murphy Ch. 8, selectively.
 - [ ] **T2.2 · Regularization.** `1.5 h` L2 and L1, early stopping, and the Bayesian view of a penalty.
 - [ ] **T2.S · Cheat sheet M2.** `1 h` The gradient descent update and its convergence picture; why L1 gives sparsity and L2 shrinks; the ridge closed form; the soft-thresholding result; learning-rate failure modes.
 - [ ] **T2.Q · Q&A M2.** `1 h` "L1 versus L2", "why does feature scaling help?", "what goes wrong with a large learning rate?"
@@ -116,40 +161,43 @@ About 101 hours including 9.5 hours of optional rows (91.5 hours required). The 
 
 ## M3. Classical supervised learning and evaluation
 
-**Related:** S2.03 to S2.05, S2.07 to S2.09, S2.11, S2.12, S7.04, S7.06; derivation D03.
+**Related:** S1.05 to S1.07, S1.13, S2.03 to S2.05, S2.07 to S2.09, S2.11, S2.12, S7.04, S7.06; derivation D03.
 
 - [ ] **T3.1 · Logistic regression and generalized linear models.** `2 h` The model, the loss, why it is convex, and the link to softmax regression.
 - [ ] **T3.2 · Naive Bayes and k-nearest neighbours.** `1.5 h` Assumptions, failure modes, and how each handles high dimensions.
 - [ ] **T3.3 · Decision trees, bagging and random forests.** `2.5 h` Impurity, greedy splits, overfitting; bagging and why it reduces variance.
 - [ ] **T3.4 · Boosting.** `1.5 h` The gradient boosting idea, and what XGBoost-style models add.
-- [ ] **T3.5 · SVM and kernels.** `opt` `1 h` Margin intuition; kernels in one page.
+- [ ] **T3.5 · SVM and kernels.** `1 h` Margin intuition; the hinge loss and its link to regularization; kernels in one page.
 - [ ] **T3.6 · Evaluation.** `1.5 h` Accuracy, precision, recall, F1, ROC and PR curves, AUC, calibration, class imbalance, data leakage, and choosing a metric for a business problem. Shervine *Supervised Learning*; Huyen for the questions.
 - [ ] **T3.S · Cheat sheet M3.** `1.5 h` One block per model with the same five lines (assumptions, loss, training, strengths, failure modes); the metrics table with when to use each; the leakage checklist; bagging versus boosting in two sentences each.
 - [ ] **T3.Q · Q&A M3.** `1.5 h` The largest set in the track. Do 8 to 10 questions, including "random forest versus gradient boosting", "why is accuracy misleading?", "how do you handle imbalance?" and "how would you detect leakage?"
 
 ---
 
-## M4. Unsupervised learning, PCA and EM
+## M4. Unsupervised learning, PCA, EM and embeddings
 
-**Related:** S2.06, S2.10, S7.07; derivations D06, D09.
+**Related:** S2.06, S2.10, S3.11, S7.07 to S7.10, S9.03; derivations D06, D09.
 
 - [ ] **T4.1 · Clustering.** `2 h` k-means and its failure modes; hierarchical clustering in outline; Gaussian mixture models.
 - [ ] **T4.2 · PCA and SVD.** `2 h` PCA, SVD and the link between them; dimensionality reduction for visualization versus for modelling. Shervine *Unsupervised Learning*.
 - [ ] **T4.3 · EM and the ELBO.** `2 h` EM and the evidence lower bound as a general idea; why latent-variable models are hard to fit. Murphy's EM chapter as a lookup.
-- [ ] **T4.S · Cheat sheet M4.** `1 h` The k-means objective and algorithm; PCA in four steps and the variance-explained rule; the EM loop in words with the E-step and M-step formulas (fill these in after derivation D09); when to use which method.
+- [ ] **T4.4 · Matrix factorization and embeddings.** `1.5 h` Low-rank factorization of a ratings matrix and its link to SVD; explicit versus implicit feedback; regularized SGD or alternating least squares; cold start; why a learned vector per item is an embedding.
+- [ ] **T4.5 · Word embeddings and contrastive learning.** `2 h` The distributional idea; word2vec skip-gram with negative sampling and why the full softmax is avoided; contrastive losses, InfoNCE, in-batch negatives and temperature; how the same idea trains sentence embeddings for retrieval. Jurafsky and Martin, *Speech and Language Processing*, the vector-semantics chapter, as a lookup.
+- [ ] **T4.S · Cheat sheet M4.** `1 h` The k-means objective and algorithm; PCA in four steps and the variance-explained rule; the matrix factorization objective and how it differs from PCA; the EM loop in words with the E-step and M-step formulas (fill these in after derivation D09); when to use which method.
 - [ ] **T4.Q · Q&A M4.** `1 h` "Why center before PCA?", "k-means versus GMM", "how do you choose k?"
 
 ---
 
 ## M5. Neural nets, backprop and training
 
-**Related:** S3.01 to S3.11, S8.01 to S8.03, S8.05; derivations D01, D08.
+**Related:** S3.01 to S3.11, S8.01 to S8.06; derivations D01, D08.
 
 - [ ] **T5.1 · MLPs, activations and backpropagation.** `2.5 h` Perceptron to MLP; ReLU, GELU, sigmoid, tanh and why saturation hurts; backpropagation as the chain rule on a graph; vanishing and exploding gradients. Karpathy's micrograd and makemore videos if backprop does not feel automatic.
 - [ ] **T5.2 · Initialization, normalization and regularizers.** `1.5 h` Xavier and He initialization, batch norm versus layer norm, dropout, weight decay, residual connections.
 - [ ] **T5.3 · Optimizers and schedules.** `1.5 h` SGD with momentum, RMSProp, Adam, AdamW; learning-rate schedules and warmup.
-- [ ] **T5.4 · CNN essentials.** `1.5 h` Convolution, pooling, receptive field.
-- [ ] **T5.5 · RNNs and LSTMs as context.** `opt` `1 h` A brief view, as context for attention.
+- [ ] **T5.4 · CNN essentials.** `1.5 h` Convolution, pooling, receptive field. Transfer learning: what to freeze, what to fine-tune, and why the learning rate is smaller.
+- [ ] **T5.5 · RNNs and LSTMs.** `1.5 h` Recurrence and backpropagation through time; why gradients vanish over long sequences; the LSTM gates (forget, input, output) and the cell state; why this led to attention.
+- [ ] **T5.6 · Training at scale: clipping, accumulation and mixed precision.** `1 h` Why gradients explode and how global-norm clipping works; gradient accumulation as a larger effective batch; fp32, fp16 and bf16, loss scaling, and what mixed precision keeps in fp32.
 - [ ] **T5.S · Cheat sheet M5.** `1.5 h` Backprop in five lines with the shape rule; an activation table; init rules and why; batch norm versus layer norm; the Adam update with the bias-correction line; a debugging checklist for a network that does not train. Shervine *Deep Learning* to check.
 - [ ] **T5.Q · Q&A M5.** `1.5 h` "Why does ReLU help?", "batch norm versus layer norm", "what happens if you initialize all weights to zero?", "explain vanishing gradients", "how do you debug a loss that does not go down?"
 
@@ -157,13 +205,14 @@ About 101 hours including 9.5 hours of optional rows (91.5 hours required). The 
 
 ## M6. Attention and the Transformer
 
-**Related:** S4.01 to S4.08, S8.07; derivation D07.
+**Related:** S4.01 to S4.08, S4.10, S8.07 to S8.09; derivation D07.
 
 - [ ] **T6.1 · Attention.** `2.5 h` Why attention (the bottleneck of fixed-size encodings); queries, keys and values; self-attention and multi-head attention; masking. CME 295 lecture 1.
-- [ ] **T6.2 · The Transformer block.** `2.5 h` Residuals, layer norm placement, feed-forward layer, positional information (sinusoidal, learned, rotary), parameter and compute counts. CME 295 cheatsheet to check.
+- [ ] **T6.2 · The Transformer block.** `2.5 h` Residuals, layer norm placement, feed-forward layer, positional information (sinusoidal, learned, rotary), RMSNorm and gated feed-forward layers (SwiGLU) as the Llama-style variants, parameter and compute counts. CME 295 cheatsheet to check.
 - [ ] **T6.3 · Tokenization.** `1 h` Byte-pair encoding and why subwords exist.
 - [ ] **T6.4 · Karpathy: Let's build GPT.** `2 h` Watch first, then build your own blind. About 1 h 56 min of video.
 - [ ] **T6.5 · Karpathy: Let's build the GPT Tokenizer.** `opt` `2 h` About 2 h 13 min of video; useful extra depth on top of T6.3.
+- [ ] **T6.6 · RoPE, grouped-query attention and flash attention.** `2 h` Rotary position embeddings and why they encode relative position; multi-query and grouped-query attention and the KV-cache saving; the online softmax trick, tiling, and why flash attention is faster without changing the result.
 - [ ] **T6.S · Cheat sheet M6.** `1.5 h` The attention formula with shapes; the √d argument in two lines; a diagram of one Transformer block; the cost of attention (`O(n²d)` time, `O(n²)` memory) and why it matters; positional encoding options; tokenization in one paragraph.
 - [ ] **T6.Q · Q&A M6.** `1.5 h` "Why scale by √d?", "why multi-head?", "encoder versus decoder models", "what is the cost of attention and how is it reduced?", "how does BPE work?"
 
@@ -179,22 +228,27 @@ About 101 hours including 9.5 hours of optional rows (91.5 hours required). The 
 - [ ] **T7.4 · Alignment.** `2.5 h` RLHF in outline (reward model, policy optimization), DPO as the simpler alternative, and what reward hacking means. CME 295 lecture 4.
 - [ ] **T7.5 · Derivation-lite.** `0.5 h` Write the next-token loss as a sum of cross-entropies and connect it back to D10. Cap at 30 minutes. (Write the DPO loss from its definition only if the lecture presents it.)
 - [ ] **T7.6 · Reference pass.** `opt` `2 h` Xiao and Zhu chapters on pretraining and alignment, or CS224N slides, for any topic that lands thin.
-- [ ] **T7.S · Cheat sheet M7.** `1.5 h` The LLM training pipeline as one diagram; decoding methods with the effect of each knob; LoRA in three lines (the low-rank update and why it saves memory); RLHF versus DPO in two columns; the scaling-law statement with its caveats.
-- [ ] **T7.Q · Q&A M7.** `1.5 h` "How does temperature work?", "what is LoRA?", "RLHF versus DPO", "why do LLMs hallucinate?", "what does perplexity measure and what are its limits?"
+- [ ] **T7.7 · Perplexity and language-model evaluation.** `1 h` Perplexity as exponentiated cross-entropy; bits per token; why tokenization changes the number; what perplexity does and does not tell you; compare models only on the same tokenizer and data.
+- [ ] **T7.S · Cheat sheet M7.** `1.5 h` The LLM training pipeline as one diagram; decoding methods with the effect of each knob; LoRA in three lines (the low-rank update and why it saves memory); the scaling-law statement with its caveats. Add RLHF versus DPO in two columns after T7.4.
+- [ ] **T7.Q · Q&A M7.** `1.5 h` "How does temperature work?", "what is LoRA?", and, after T7.4, T7.7 and T8.7, "RLHF versus DPO", "what does perplexity measure and what are its limits?" and "why do LLMs hallucinate?"
 
 ---
 
 ## M8. LLM systems, applications and evaluation
 
-**Related:** S4.09, S5.01 to S5.08, S6.01 to S6.03, S6.09, S6.10, S9.04, S9.05, and your LLM-judge calibration capstone.
+**Related:** S4.09, S5.01 to S5.10, S6.01 to S6.03, S6.07 to S6.10, S9.01, S9.02, S9.04 to S9.08, and your LLM-judge calibration capstone.
 
 - [ ] **T8.1 · Inference.** `2.5 h` The KV cache, why decoding is memory-bound, batching, quantization, and the latency versus throughput trade-off. CME 295 lecture 5.
 - [ ] **T8.2 · Retrieval-augmented generation.** `2 h` Embeddings, chunking, retrieval quality, and where RAG fails. Huyen, *AI Engineering*.
 - [ ] **T8.3 · Evaluation.** `2.5 h` Benchmarks and their contamination, human evaluation, LLM-as-judge and its biases (position, verbosity), and calibration. CME 295 lecture 7; Huyen.
-- [ ] **T8.4 · Agents.** `opt` `1.5 h` Tool use, planning loops, and failure modes. CME 295 lecture 6.
+- [ ] **T8.4 · Agents.** `1.5 h` Function calling and structured output, tool use, planning loops, and failure modes. CME 295 lecture 6.
 - [ ] **T8.5 · Diffusion LLMs and trending topics.** `opt` `2 h` CME 295 lectures 8 and 9.
-- [ ] **T8.S · Cheat sheet M8.** `1.5 h` The KV-cache size formula and why it limits context length; a table of RAG failure modes and fixes; the evaluation methods table with biases for each; a quantization summary (what is lost, what is gained).
-- [ ] **T8.Q · Q&A M8.** `1.5 h` "How would you evaluate an LLM application?", "RAG or finetuning?", "what is the KV cache?", "how do you detect and reduce judge bias?"
+- [ ] **T8.6 · Retrieval and ranking.** `2 h` TF-IDF and BM25 and what their parameters do; dense retrieval and cosine similarity; hybrid search and reciprocal rank fusion; rerankers (cross-encoders); ranking metrics (recall@k, precision@k, MRR, nDCG) and when each fits; approximate nearest-neighbour indexes (IVF, HNSW) and the recall-latency trade-off; top-N recommendation and its metrics. Manning, Raghavan and Schütze, *Introduction to Information Retrieval* (free online), as a lookup.
+- [ ] **T8.7 · Hallucination, faithfulness and prompt injection.** `1.5 h` Why models hallucinate; groundedness and faithfulness checks for RAG; prompt injection (direct and indirect), jailbreaks, data leakage through tools, and the limits of guardrails. Huyen, *AI Engineering*; the OWASP Top 10 for LLM applications.
+- [ ] **T8.8 · Shipping a model: tests, CI, containers and drift.** `1.5 h` Reproducible environments and containers; what CI should run for an ML project; data drift and concept drift and how to detect them (population stability index, the KS test); monitoring and rollback; exporting to ONNX and what changes at runtime.
+- [ ] **T8.9 · Serving at scale: caching, tail latency and tracking.** `1.5 h` Latency percentiles and why p99 matters; load testing and queueing; caching, exact versus semantic, and invalidation; batching and throughput; experiment tracking, data and model versioning, and reproducibility.
+- [ ] **T8.S · Cheat sheet M8.** `1.5 h` The KV-cache size formula and why it limits context length; a table of RAG failure modes and fixes; the evaluation methods table with biases for each; a quantization summary (what is lost, what is gained); the BM25 formula and the retrieval metrics (recall@k, MRR, nDCG) with when each fits.
+- [ ] **T8.Q · Q&A M8.** `1.5 h` "How would you evaluate an LLM application?", "RAG or finetuning?", "what is the KV cache?", "how do you detect and reduce judge bias?" and "BM25 or dense retrieval?"
 
 ---
 

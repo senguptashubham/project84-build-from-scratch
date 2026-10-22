@@ -49,7 +49,7 @@ The related code items are a static link, not a schedule: your own implementatio
 - [ ] **D01 · Softmax + cross-entropy gradient.** `1 h` Derived on paper, faked step named, numeric check passed.
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
-**Related code:** S3.02.
+**Related code:** S3.02. Do this one before S3.02: that item asks you to derive this gradient yourself.
 
 **Derive:** For logits `z`, `p = softmax(z)` and a one-hot label `y`, the loss is `L = -Σ yₖ log pₖ`. Show that `∂L/∂z = p − y`.
 

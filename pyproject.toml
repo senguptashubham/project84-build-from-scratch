@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-pythonpath = ["code"]
+pythonpath = ["code", "."]
 log_cli = true
 log_cli_level = "INFO"
 log_format = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"

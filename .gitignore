@@ -10,6 +10,9 @@ __pycache__/
 .venv/
 venv/
 
+# Personal tooling
+.claude/
+
 # Editors / OS
 .idea/
 .DS_Store

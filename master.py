@@ -11,6 +11,7 @@ Usage (run from anywhere; paths are relative to this file):
     python master.py --check    validate only; exit 1 on any problem
 
 Trackers:  code/CODE_README.md (S..)  derivation/DERIVATION_README.md (D..)  theory/THEORY_README.md (T..)
+Time log:  log.md, one row per work session: | Date | ID | Minutes |  (empty Minutes = unknown)
 """
 import re
 import sys
@@ -18,9 +19,11 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 MASTER = HERE / "README.md"
+LOG = HERE / "log.md"
 SIZE_H = {"S": 1.5, "M": 3.5, "L": 6.0}
 TRACKS = [("S", "Code"), ("T", "Theory"), ("D", "Derivations")]
 TRACK_NAME = dict(TRACKS)
+NEXT_UP = 3
 ID_RE = r"[SDT]\d[0-9.SQ]*"
 
 
@@ -54,6 +57,31 @@ def parse_trackers():
                 problems.append(f"{i} in {fname} has the wrong prefix (expected {letter})")
             add(i, dict(track=i[0], title=m.group(3).rstrip(". "), hours=float(m.group(5)), opt=bool(m.group(4)), done=m.group(1) == "x"), fname)
     return items, problems
+
+
+def parse_log(text, items):
+    """Return (minutes, problems). minutes maps ID -> total logged minutes.
+
+    A row with an empty Minutes cell is unknown, not zero, so it adds nothing.
+    """
+    minutes, problems = {}, []
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 3 or cells[1] == "ID" or set(cells[1]) <= set("-: "):
+            continue
+        i, mins = cells[1], cells[2]
+        if i not in items:
+            problems.append(f"log.md line {n}: {i!r} is not in any tracker file")
+            continue
+        if mins == "":
+            continue
+        try:
+            minutes[i] = minutes.get(i, 0.0) + float(mins)
+        except ValueError:
+            problems.append(f"log.md line {n}: Minutes {mins!r} is not a number")
+    return minutes, problems
 
 
 def parse_master():
@@ -90,7 +118,8 @@ def validate(items, weeks):
     return problems
 
 
-def render(items, weeks, intro, outro):
+def render(items, weeks, intro, outro, minutes=None):
+    minutes = minutes or {}
     out = []
     A = out.append
     A(intro.rstrip("\n"))
@@ -103,21 +132,35 @@ def render(items, weeks, intro, outro):
         req = [i for i in ids if not items[i]["opt"]]
         done_req = [i for i in req if items[i]["done"]]
         done_all = [i for i in ids if items[i]["done"]]
+        timed = [i for i in done_all if i in minutes]
+        planned_timed = sum(items[i]["hours"] for i in timed)
         stats[tr] = dict(
             name=name, req=len(req), done_req=len(done_req),
             hours=sum(items[i]["hours"] for i in ids),
             hours_done=sum(items[i]["hours"] for i in done_all),
+            actual=sum(minutes.get(i, 0.0) for i in ids) / 60,
+            actual_timed=sum(minutes[i] for i in timed) / 60,
+            planned_timed=planned_timed,
         )
     A("## Progress")
     A("")
-    A("| Track | Required rows done | Hours done | Hours in plan |")
-    A("| --- | --- | --- | --- |")
+    A("| Track | Required rows done | Hours done | Hours in plan | Actual hours logged | Actual / planned |")
+    A("| --- | --- | --- | --- | --- | --- |")
+
+    def ratio(actual, planned):
+        return f"{actual / planned:.2f}" if planned else "-"
+
     for tr, name in TRACKS:
         s = stats[tr]
-        A(f"| {name} | {s['done_req']} / {s['req']} | {fmt(s['hours_done'])} | {fmt(s['hours'])} |")
+        A(f"| {name} | {s['done_req']} / {s['req']} | {fmt(s['hours_done'])} | {fmt(s['hours'])} | {fmt(round(s['actual'], 1))} | {ratio(s['actual_timed'], s['planned_timed'])} |")
     tot_h = sum(s["hours"] for s in stats.values())
     tot_d = sum(s["hours_done"] for s in stats.values())
-    A(f"| **All** | **{sum(s['done_req'] for s in stats.values())} / {sum(s['req'] for s in stats.values())}** | **{fmt(tot_d)}** | **{fmt(tot_h)}** |")
+    tot_a = sum(s["actual"] for s in stats.values())
+    tot_at = sum(s["actual_timed"] for s in stats.values())
+    tot_pt = sum(s["planned_timed"] for s in stats.values())
+    A(f"| **All** | **{sum(s['done_req'] for s in stats.values())} / {sum(s['req'] for s in stats.values())}** | **{fmt(tot_d)}** | **{fmt(tot_h)}** | **{fmt(round(tot_a, 1))}** | **{ratio(tot_at, tot_pt)}** |")
+    A("")
+    A("*Actual / planned* compares logged time with the size tags, for finished rows that have minutes in `log.md`.")
     A("")
 
     # next up
@@ -129,12 +172,13 @@ def render(items, weeks, intro, outro):
         for i in w["ids"]:
             week_of[i] = wi
             order.append(i)
-    for tr, name in TRACKS:
-        nxt = next((i for i in order if i in items and items[i]["track"] == tr and not items[i]["done"] and not items[i]["opt"]), None)
-        if nxt:
-            A(f"- **{name}:** {nxt} · {items[nxt]['title']} (Week {week_of[nxt]})")
-        else:
-            A(f"- **{name}:** all required rows done")
+    A(f"The next {NEXT_UP} unticked rows in plan order, across all three tracks. Optional rows are skipped.")
+    A("")
+    upcoming = [i for i in order if i in items and not items[i]["done"] and not items[i]["opt"]][:NEXT_UP]
+    for n, i in enumerate(upcoming, 1):
+        A(f"{n}. **{i}** · {items[i]['title']} ({TRACK_NAME[items[i]['track']]}, Week {week_of[i]})")
+    if not upcoming:
+        A("All required rows are done.")
     A("")
 
     # weeks
@@ -174,6 +218,8 @@ def main():
     items, problems = parse_trackers()
     weeks = parse_master()
     problems += validate(items, weeks)
+    minutes, log_problems = parse_log(LOG.read_text(encoding="utf-8") if LOG.exists() else "", items)
+    problems += log_problems
     if problems:
         print("Problems found:")
         for p in problems:
@@ -187,7 +233,7 @@ def main():
     text = MASTER.read_text(encoding="utf-8")
     intro = text[: text.index("## Progress")]
     outro = text[text.index("\n## License"):]
-    MASTER.write_text(render(items, weeks, intro, outro), encoding="utf-8", newline="\n")
+    MASTER.write_text(render(items, weeks, intro, outro, minutes), encoding="utf-8", newline="\n")
     print(f"README.md refreshed: {len(items)} rows, {len(weeks)} weeks.")
 
 

@@ -37,7 +37,7 @@ Every item carries a size tag: `S` is about 1.5 h, `M` about 3.5 h, `L` about 6 
 
 Each sprint is split into Part A and Part B, about a week each, with a table showing the order to work in. Items are listed in ID order further down; where the Order column differs (for example S3.11 comes before S3.04), follow the Order column. Each sprint also has an *If you fall behind* line that names what to cut first.
 
-**Calibrate early.** After S1.04-S1.07, compare your actual hours with the tags. If you run 1.5 times over, treat every sprint's hours as 1.5 times larger and start using the *If you fall behind* lines from Sprint 1 instead of waiting for Sprint 3.
+**Calibrate early.** Add a line to `log.md` with your minutes each time you tick an item. After S1.04-S1.07, look at the *Actual / planned* column in the Progress table in `README.md`. If it is 1.5 or more, treat every sprint's hours as 1.5 times larger and start using the *If you fall behind* lines from Sprint 1 instead of waiting for Sprint 3.
 
 ## Setup
 
@@ -51,19 +51,20 @@ Each sprint is split into Part A and Part B, about a week each, with a table sho
 
 1. Fork or copy this repo.
 2. Each sprint has 10-16 items in two parts (A and B). Sprints 1-6 run 14 days; Sprints 7-9 run 12 days. Rewrites (Rule 3) and overruns come out of the same hour budget, which is what the *If you fall behind* lines are for.
-3. Tick each box as you commit its solution. Your commit history becomes your progress log.
-4. Missing a day is fine. Finishing is what matters.
+3. Tick each box as you commit its solution, and add a line to `log.md` with your minutes. Your commit history becomes your progress log.
+4. Missing a day is fine. Finishing is what matters. On a bad day, 25 minutes on the current item still counts as a session.
 5. Sprints 7-9 are breadth. Their items are independent of each other (with the two exceptions noted in Sprint 7), so if time runs short, skip an item rather than rushing it.
 6. At the end of each part, run `pytest` on the whole sprint folder and fix anything that broke. That is the checkpoint.
 
 ## Rules
 
 1. **Blank file every time.** Look up APIs in official docs or search engines, but don't open an existing implementation of the item until yours is committed. No code assistant, no inline autocomplete.
-2. **30-minute rule.** Stuck for 30 minutes? Ask an AI for *one hint*, never code.
-3. **Rewrite rule.** Anything you needed a hint for gets rewritten from a blank file the next day, in `rewrites/`.
+2. **30-minute rule.** Stuck for 30 minutes? First spend 10 minutes on paper: draw the shapes or how the data flows. Still stuck? Ask an AI for *one hint*, never code.
+3. **Rewrite rule.** Anything you needed a hint for gets rewritten from a blank file the next day, in `code/rewrites/`.
 4. **Prove it.** Every item ships with a test file run by `pytest`. Where a library equivalent exists (NumPy, scikit-learn, PyTorch), your output must match it within a stated tolerance (default `1e-6`).
 5. **One commit per item**, message format: `S1.03: stratified split`.
 6. **Scope lock.** If a sprint runs long, cut what its *If you fall behind* line names, starting with the decision tree items (S2.07-S2.09) in Sprint 2. Never add items mid-sprint; park ideas in `PARKED.md`.
+7. **Defend it.** Optional, best for `M` and `L` items. Once an item is committed and its tests pass, ask an AI to critique it, not to fix it: numerical stability, edge cases, time and memory cost, and why each line is needed. Answer each point yourself. If you want a record, keep it in `code/critiques/<ID>.md`, one file per item, and add a new run when you critique again instead of overwriting the old one. Fixes go in a new commit, for example `S1.05: fix after critique`.
 
 ## Repo layout
 
@@ -82,6 +83,7 @@ code/                    (this folder; requirements.txt and pyproject.toml are o
     sprint8_deep_learning_breadth/
     sprint9_retrieval_serving_breadth/
     rewrites/
+    critiques/           optional critique notes, one file per item
 ```
 
 Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only where an item asks for plots or a written report, and keep any logic it tests in a `.py` file.
