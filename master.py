@@ -9,12 +9,15 @@ totals) is copied from the tracker files, so you never edit those by hand.
 Usage (run from anywhere; paths are relative to this file):
     python master.py            refresh README.md in place
     python master.py --check    validate only; exit 1 on any problem
+    python master.py --sync-notes   copy each theory row's text and each derivation's Derive: line into its note's description: field
 
 Trackers:  code/CODE_README.md (S..)  derivation/DERIVATION_README.md (D..)  theory/THEORY_README.md (T..)
 Time log:  log.md, one row per work session: | Date | ID | Minutes |  (empty Minutes = unknown)
 Notes:     theory/notes/<area>/T<row>-<title>.md and derivation/D<nn>-<title>.md, one per row, each with a "row: .." line;
            item titles on the README link to them
 """
+import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -45,21 +48,21 @@ def parse_trackers():
 
     # Code: README.md
     text = (HERE / "code" / "CODE_README.md").read_text(encoding="utf-8")
-    pat = re.compile(r"^- \[( |x)\] \*\*(S\d\.\d\d)( ★)? · (.*?)\*\* `([SML])`", re.M)
+    pat = re.compile(r"^- \[( |x|X)\] \*\*(S\d\.\d\d)( ★)? · (.*?)\*\* `([SML])`", re.M)
     for m in pat.finditer(text):
         title = m.group(4).rstrip(". ")
         if m.group(3):
             title += " ★"
-        add(m.group(2), dict(track="S", title=title, hours=SIZE_H[m.group(5)], opt=False, done=m.group(1) == "x"), "code/CODE_README.md")
+        add(m.group(2), dict(track="S", title=title, hours=SIZE_H[m.group(5)], opt=False, done=m.group(1) in "xX"), "code/CODE_README.md")
     # Others
-    pat2 = re.compile(r"^- \[( |x)\] \*\*(" + ID_RE + r") · (.*?)\*\* (`opt` )?`([\d.]+) h`", re.M)
+    pat2 = re.compile(r"^- \[( |x|X)\] \*\*(" + ID_RE + r") · (.*?)\*\* (`opt` )?`([\d.]+) h`", re.M)
     for fname, letter in (("derivation/DERIVATION_README.md", "D"), ("theory/THEORY_README.md", "T")):
         text = (HERE / fname).read_text(encoding="utf-8")
         for m in pat2.finditer(text):
             i = m.group(2)
             if i[0] != letter:
                 problems.append(f"{i} in {fname} has the wrong prefix (expected {letter})")
-            add(i, dict(track=i[0], title=m.group(3).rstrip(". "), hours=float(m.group(5)), opt=bool(m.group(4)), done=m.group(1) == "x"), fname)
+            add(i, dict(track=i[0], title=m.group(3).rstrip(". "), hours=float(m.group(5)), opt=bool(m.group(4)), done=m.group(1) in "xX"), fname)
     return items, problems
 
 
@@ -82,9 +85,13 @@ def parse_log(text, items):
         if mins == "":
             continue
         try:
-            minutes[i] = minutes.get(i, 0.0) + float(mins)
+            value = float(mins)
         except ValueError:
-            problems.append(f"log.md line {n}: Minutes {mins!r} is not a number")
+            value = math.nan
+        if not math.isfinite(value) or value < 0:
+            problems.append(f"log.md line {n}: Minutes {mins!r} is not a non-negative number")
+            continue
+        minutes[i] = minutes.get(i, 0.0) + value
     return minutes, problems
 
 
@@ -94,7 +101,82 @@ def slug(heading):
     return h.replace(" ", "-")
 
 
-def parse_notes(files=None, row_pat=r"T\d\.\d"):
+def tracker_descriptions(tracker_text):
+    """Map each theory row to the description text after its hours tag, without the trailing Notes: link."""
+    pat = r"^- \[.\] \*\*(T\d\.\d+) · .*?\*\* (?:`opt` )?`[\d.]+ h` (.*?)(?: Notes: \[[^\]]*\]\([^)]*\)\.)?$"
+    return {m.group(1): m.group(2).strip() for m in re.finditer(pat, tracker_text, re.M)}
+
+
+def derivation_descriptions(deriv_text):
+    """Map each derivation to the text of its '**Derive:**' line."""
+    out = {}
+    for m in re.finditer(r"^## (D\d\d) · .*?\n(.*?)(?=^## D\d\d ·|\Z)", deriv_text, re.M | re.S):
+        d = re.search(r"^\*\*Derive:\*\* (.*)$", m.group(2), re.M)
+        if d:
+            out[m.group(1)] = d.group(1).strip()
+    return out
+
+
+def yaml_scalar(text):
+    """A one-line YAML value: plain when that is safe, otherwise double-quoted."""
+    risky = re.search(r": |\s#", text) or text[:1] in "&*!|>'\"%@`[]{},#-?" or text != text.strip() or text.endswith(":")
+    return json.dumps(text, ensure_ascii=False) if risky else text
+
+
+def note_description(note_text):
+    """The value of a note's description: property, tolerating the shapes an editor may re-save it in
+    (quoted, wrapped over several lines, or a folded/literal block)."""
+    front = re.match(r"^---\n(.*?)\n---\n", note_text.replace("\r\n", "\n"), re.S)
+    m = re.search(r"^description:[ \t]*(.*(?:\n[ \t]+.*)*)", front.group(1), re.M) if front else None
+    if not m:
+        return None
+    head, *rest = m.group(1).split("\n")
+    head = head.strip()
+    if head in (">", ">-", ">+", "|", "|-", "|+"):
+        return (" " if head[0] == ">" else "\n").join(line.strip() for line in rest).strip()
+    value = " ".join([head] + [line.strip() for line in rest]).strip()
+    if value.startswith('"'):
+        try:
+            return json.loads(value)
+        except ValueError:
+            return value
+    if len(value) > 1 and value[0] == "'" and value[-1] == "'":
+        return value[1:-1].replace("''", "'")
+    return value
+
+
+def check_descriptions(notes, want, source="theory/THEORY_README.md"):
+    """Each note's description: field must equal the text it mirrors (a row, or a derivation's Derive: line)."""
+    problems = []
+    for row, rel in notes.items():
+        have = note_description((HERE / rel).read_text(encoding="utf-8"))
+        if row in want and have != want[row]:
+            problems.append(f"{rel}: description differs from {source} (run: python master.py --sync-notes)")
+    return problems
+
+
+def sync_descriptions(notes, want):
+    """Rewrite each note's description: line from the text it mirrors. Returns the files that changed."""
+    changed = []
+    for row, rel in notes.items():
+        path = HERE / rel
+        text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+        front = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+        if row not in want or not front:
+            continue
+        line = f"description: {yaml_scalar(want[row])}"
+        if re.search(r"^description:", front.group(1), re.M):
+            new_front = re.sub(r"^description:.*(?:\n[ \t]+.*)*", lambda _: line, front.group(1), count=1, flags=re.M)
+        else:
+            new_front = re.sub(r"^(row: .*)$", lambda m: m.group(1) + "\n" + line, front.group(1), count=1, flags=re.M)
+        new_text = "---\n" + new_front + "\n---\n" + text[front.end():]
+        if new_text != text:
+            path.write_text(new_text, encoding="utf-8", newline="\n")
+            changed.append(rel)
+    return changed
+
+
+def parse_notes(files=None, row_pat=r"T\d\.\d+"):
     """Return ({row: notes path relative to the repo root}, problems), from each note file's row: line."""
     links, problems = {}, []
     for f in sorted(NOTES.glob("*/*.md")) if files is None else files:
@@ -140,7 +222,7 @@ def check_derivations(items, notes, text):
 def check_notes(items, notes, theory_text):
     problems = check_links(items, notes, theory_text, "theory/THEORY_README.md")
     for row in items:
-        if re.fullmatch(r"T\d\.\d", row) and row not in NO_NOTES and not row.startswith("T9") and row not in notes:
+        if re.fullmatch(r"T\d\.\d+", row) and row not in NO_NOTES and not row.startswith("T9") and row not in notes:
             problems.append(f"{row} has no notes file (add theory/notes/<area>/{row}-<title>.md with a 'row: {row}' line)")
     return problems
 
@@ -306,9 +388,18 @@ def main():
     weeks = parse_master()
     problems += validate(items, weeks)
     notes, note_problems = parse_notes()
-    problems += note_problems + check_notes(items, notes, (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8"))
+    theory_text = (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8")
+    deriv_text = (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8")
     dnotes, dnote_problems = parse_notes(sorted((HERE / "derivation").glob("D??-*.md")), r"D\d\d")
-    problems += dnote_problems + check_derivations(items, dnotes, (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8"))
+    if "--sync-notes" in sys.argv:
+        changed = sync_descriptions(notes, tracker_descriptions(theory_text)) + sync_descriptions(dnotes, derivation_descriptions(deriv_text))
+        print(f"{len(changed)} note description(s) refreshed from the trackers.")
+        for rel in changed:
+            print(" -", rel)
+        return
+    problems += note_problems + check_notes(items, notes, theory_text) + check_descriptions(notes, tracker_descriptions(theory_text))
+    problems += dnote_problems + check_derivations(items, dnotes, deriv_text)
+    problems += check_descriptions(dnotes, derivation_descriptions(deriv_text), "the 'Derive:' line in derivation/DERIVATION_README.md")
     notes = {**notes, **dnotes}
     minutes, log_problems = parse_log(LOG.read_text(encoding="utf-8") if LOG.exists() else "", items)
     problems += log_problems

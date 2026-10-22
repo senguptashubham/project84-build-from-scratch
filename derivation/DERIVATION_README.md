@@ -18,7 +18,7 @@ Budget about 1 to 1.5 hours each, 13.5 hours in total. These hours are not count
 
 ## How to work each one
 
-1. **Paper first.** Pen and paper. Photograph it, or retype a clean version, into the derivation's note file (the `Notes:` link on its row). Put photos next to it in `derivation/`.
+1. **Paper first.** Pen and paper. Photograph it, or retype a clean version, into the derivation's note file (the `Notes:` link on its row). Put photos next to it in `derivation/`. The note's `description:` field copies the entry's **Derive:** line; edit it here, then run `python master.py --sync-notes`.
 2. **25-minute cap.** Stuck for 25 minutes? Take one hint, close it, then continue on your own.
 3. **Name the faked step.** Write one sentence on the step in the "Step people usually fake" row and why it is true. If you cannot, the derivation is not done.
 4. **Check numerically.** Use the small check in each entry. A few lines of NumPy are enough.

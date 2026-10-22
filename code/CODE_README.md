@@ -41,7 +41,7 @@ Each sprint is split into Part A and Part B, about a week each, with a table sho
 
 ## Setup
 
-- **Python 3.10+** and these packages: `numpy scipy pandas matplotlib scikit-learn torch pytest`. Sprint 1 adds `statsmodels` (for S1.16); Sprint 4 adds `transformers` (for loading GPT-2 weights); Sprint 5 adds `sentence-transformers faiss-cpu rank_bm25 tiktoken pydantic`; Sprint 6 adds `fastapi uvicorn onnx onnxruntime` plus a RAG library of your choice (LangChain or LlamaIndex); Sprint 8 adds `torchvision`; Sprint 9 adds `httpx` (and optionally `mlflow` or `locust`).
+- **Python 3.10+** and these packages, all in `requirements.txt`: `numpy scipy pandas matplotlib scikit-learn torch statsmodels pytest` (`statsmodels` is for S1.16). Sprint 4 adds `transformers` (for loading GPT-2 weights); Sprint 5 adds `sentence-transformers faiss-cpu rank_bm25 tiktoken pydantic`; Sprint 6 adds `fastapi uvicorn onnx onnxruntime` plus a RAG library of your choice (LangChain or LlamaIndex); Sprint 8 adds `torchvision`; Sprint 9 adds `httpx` (and optionally `mlflow` or `locust`).
 - **Other tools:** Docker (or Podman) for S6.07, and a GitHub repo with Actions enabled for CI.
 - **Hardware:** a laptop is enough for everything. Sprint 4's GPT trains on a CPU with a small model; a free Google Colab GPU makes it faster, and helps with S8.05, S8.06 and S8.09.
 - **An LLM for Sprints 5-6 and 9:** either an API key (most providers offer free or cheap tiers) or a free local model through [Ollama](https://ollama.com). For S5.08, pick a model that supports tool calling.

@@ -119,3 +119,76 @@ def test_scratch_files_in_notes_are_ignored_but_a_note_without_row_is_reported(t
         master.HERE = old
     assert links == {"T1.1": "T1.1-mle.md"}
     assert problems == ["T1.2-bias.md has no 'row: ..' line"]
+
+
+def test_tracker_descriptions_strip_the_notes_link_and_hours():
+    text = ("- [ ] **T1.2 \u00b7 Bias.** `2.5 h` Bias, variance; splits. Notes: [T1.2-bias](notes/x/T1.2-bias.md).\n"
+            "- [ ] **T8.10 \u00b7 APIs.** `1 h` Retries and backoff.\n"
+            "- [ ] **T6.5 \u00b7 Video.** `opt` `2 h` Optional depth.\n")
+    assert master.tracker_descriptions(text) == {
+        "T1.2": "Bias, variance; splits.",
+        "T8.10": "Retries and backoff.",
+        "T6.5": "Optional depth.",
+    }
+
+
+def test_yaml_scalar_quotes_only_when_needed():
+    assert master.yaml_scalar("Plain text; with *stars* and commas, fine.") == "Plain text; with *stars* and commas, fine."
+    assert master.yaml_scalar("Transfer learning: freeze") == '"Transfer learning: freeze"'
+    assert master.yaml_scalar("A note # with hash") == '"A note # with hash"'
+
+
+def test_sync_descriptions_rewrites_only_the_description_line(tmp_path):
+    note = tmp_path / "T1.2-bias.md"
+    note.write_text("---\ntags:\n  - foundations\nrow: T1.2\ndescription: old text\n---\n# T1.2\n\nmy own notes\n", encoding="utf-8")
+    old_here, master.HERE = master.HERE, tmp_path
+    try:
+        tracker = "- [ ] **T1.2 \u00b7 Bias.** `2 h` New text: with colon. Notes: [x](y.md).\n"
+        want = master.tracker_descriptions(tracker)
+        assert master.check_descriptions({"T1.2": "T1.2-bias.md"}, want)  # drift is reported
+        assert master.sync_descriptions({"T1.2": "T1.2-bias.md"}, want) == ["T1.2-bias.md"]
+        assert master.check_descriptions({"T1.2": "T1.2-bias.md"}, want) == []
+        assert master.sync_descriptions({"T1.2": "T1.2-bias.md"}, want) == []  # idempotent
+    finally:
+        master.HERE = old_here
+    body = note.read_text(encoding="utf-8")
+    assert 'description: "New text: with colon."' in body and body.endswith("my own notes\n")
+
+
+def test_derivation_descriptions_come_from_the_derive_line():
+    text = (
+        "## D01 · First\n\n- [ ] **D01 · First.** `1 h` x\n\n**Related code:** S3.02.\n\n"
+        "**Derive:** Show that `a = b`.\n\n**Intuition:** ...\n\n---\n\n"
+        "## D02 · Second\n\n**Derive:** Obtain the normal equations.\n"
+    )
+    assert master.derivation_descriptions(text) == {"D01": "Show that `a = b`.", "D02": "Obtain the normal equations."}
+
+
+def test_note_description_reads_the_shapes_an_editor_may_resave():
+    def note(desc_block):
+        return "---\ntags:\n  - x\nrow: T1.1\n" + desc_block + "\n---\n# body\n"
+
+    assert master.note_description(note("description: plain text")) == "plain text"
+    assert master.note_description(note('description: "quoted: yes"')) == "quoted: yes"
+    assert master.note_description(note("description: 'it''s single quoted'")) == "it's single quoted"
+    assert master.note_description(note("description: first part\n  second part")) == "first part second part"
+    assert master.note_description(note("description: >-\n  folded\n  text")) == "folded text"
+    assert master.note_description(note("tags: []")) is None
+
+
+def test_sync_replaces_a_wrapped_description_completely(tmp_path):
+    note = tmp_path / "T1.1-x.md"
+    note.write_text("---\ntags:\n  - x\nrow: T1.1\ndescription: old first line\n  old second line\n---\n# body\n", encoding="utf-8")
+    old_here, master.HERE = master.HERE, tmp_path
+    try:
+        assert master.sync_descriptions({"T1.1": "T1.1-x.md"}, {"T1.1": "new text"}) == ["T1.1-x.md"]
+    finally:
+        master.HERE = old_here
+    assert note.read_text(encoding="utf-8") == "---\ntags:\n  - x\nrow: T1.1\ndescription: new text\n---\n# body\n"
+
+
+def test_log_rejects_nan_inf_and_negative_minutes():
+    items = {"S1.01": dict(track="S", title="a", hours=1.5, opt=False, done=True)}
+    text = "| Date | ID | Minutes |\n| | S1.01 | nan |\n| | S1.01 | inf |\n| | S1.01 | -5 |\n| | S1.01 | 30 |\n"
+    minutes, problems = master.parse_log(text, items)
+    assert minutes == {"S1.01": 30.0} and len(problems) == 3

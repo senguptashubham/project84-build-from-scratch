@@ -29,11 +29,11 @@ The trackers hold the details and the checkboxes. This page holds only the order
 | Track | Items | Hours |
 | --- | --- | --- |
 | Code | 103 | 369.5 |
-| Theory | 71 (3 optional) | 118 |
+| Theory | 76 (3 optional) | 124.5 |
 | Derivations | 10 | 13.5 |
-| **Total** | **184** | **501** |
+| **Total** | **189** | **507.5** |
 
-That averages about 28 hours a week over 18 weeks, but the load is front-heavy on purpose: weeks 1-9 run 29-34 hours, and weeks 10-18 are lighter (20-28 hours), which leaves room to catch up. The weekly hours are on each week's header below. Each week is one Part of a Project 84 sprint.
+That averages about 28 hours a week over 18 weeks, but the load is front-heavy on purpose: weeks 1-9 run 29-35.5 hours, and weeks 10-18 are lighter (21-28 hours), which leaves room to catch up. The weekly hours are on each week's header below. Each week is one Part of a Project 84 sprint.
 
 | Sprint | Days | Theme | Code items | Code hours |
 | --- | --- | --- | --- | --- |
@@ -62,7 +62,7 @@ That averages about 28 hours a week over 18 weeks, but the load is front-heavy o
 
    The commit hook refreshes this page on every commit. Conda works as well as `venv`: create and activate an environment, then run the last two commands. Packages for later sprints are listed in [code/CODE_README.md](code/CODE_README.md#setup); install each when you reach it.
 2. Each day, open this page, find your week and take the next unticked rows. Do them in the order shown; the order is the point.
-3. Click an item's title for its details: theory topics open their notes file, derivations and code items open their tracker entry. Do the item, tick it in the tracker file, and add a line to `log.md` with your minutes.
+3. Click an item's title for its details: theory topics and derivations open their note file, code items open their sprint section in the code tracker. Do the item, tick it in the tracker file, and add a line to `log.md` with your minutes.
 4. Commit the work and the tick. The commit hook runs `master.py` and adds the refreshed `README.md` to the same commit; if the trackers disagree with this page, it stops the commit and says why. You can also run `python master.py` or `python master.py --check` by hand.
 5. Missing a day is fine. Finishing is what matters. On a bad day, 25 minutes on the current item still counts as a session. Unfinished rows slide into the next week; nothing is dropped.
 6. At the end of each week, run `pytest` on that sprint's folder and fix anything that broke. That is the checkpoint. If you have spare time, redo one finished code item from a couple of weeks earlier from a blank file in `code/rewrites/`, in 60 minutes at most. Favour the items the final exams lean on, such as k-means, logistic regression and attention. A redo is not a plan item and has no checkbox.
@@ -119,6 +119,7 @@ theory/
     notes/               one notes file per theory row, in five area folders
     cheatsheets/         M0.md ... M8.md, ALL.md
     qa/                  M0.md ... M8.md
+    assets/              images and diagrams pasted into notes
 derivation/
     DERIVATION_README.md derivations tracker
     D01-<title>.md ... D10-<title>.md   one note file per derivation (scans or photos can sit beside them)
@@ -131,9 +132,9 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 | Track | Required rows done | Hours done | Hours in plan | Actual hours logged | Actual / planned |
 | --- | --- | --- | --- | --- | --- |
 | Code | 4 / 103 | 6 | 369.5 | 0 | - |
-| Theory | 0 / 68 | 0 | 118 | 0 | - |
+| Theory | 0 / 73 | 0 | 124.5 | 0 | - |
 | Derivations | 0 / 10 | 0 | 13.5 | 0 | - |
-| **All** | **4 / 181** | **6** | **501** | **0** | **-** |
+| **All** | **4 / 186** | **6** | **507.5** | **0** | **-** |
 
 *Actual / planned* compares logged time with the size tags, for finished rows that have minutes in `log.md`.
 
@@ -142,26 +143,28 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 The next 3 unticked rows in plan order, across all three tracks. Optional rows are skipped.
 
 1. **T0.2** · Linear algebra (Theory, Week 1)
-2. **T0.1** · Probability (Theory, Week 1)
-3. **T1.2** · Bias, variance and validation (Theory, Week 1)
+2. **T0.5** · Numerical stability (Theory, Week 1)
+3. **T0.1** · Probability (Theory, Week 1)
 
 ## Week 1 · Project 84 days 1-7 · Sprint 1 Part A: Splits, metrics, pandas
 
-**Hours:** 32.5 (Code 19.5 · Theory 13 · Derivations 0)
+**Hours:** 35.5 (Code 19.5 · Theory 16 · Derivations 0)
 
 | Done | ID | Item | Hours |
 | --- | --- | --- | --- |
 | ☐ | T0.2 | [Linear algebra](theory/notes/01-foundations/T0.2-linear-algebra.md) | 2 |
+| ☐ | T0.5 | [Numerical stability](theory/notes/01-foundations/T0.5-numerical-stability.md) | 1 |
 | ☑ | S1.01 | [Pairwise distances without loops](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☑ | S1.02 | [Numerically stable activations](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☐ | T0.1 | [Probability](theory/notes/01-foundations/T0.1-probability.md) | 2.5 |
 | ☐ | T1.2 | [Bias, variance and validation](theory/notes/01-foundations/T1.2-bias-variance-and-validation.md) | 2.5 |
 | ☑ | S1.03 | [Data splits](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☑ | S1.04 | [k-fold cross-validation](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
-| ☐ | T3.6 | [Evaluation](theory/notes/02-classical-ml/T3.6-evaluation.md) | 1.5 |
+| ☐ | T3.6 | [Evaluation](theory/notes/02-classical-ml/T3.6-evaluation.md) | 2 |
 | ☐ | S1.05 | [Classification metrics from raw arrays](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☐ | S1.06 | [ROC-AUC from scores](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 3.5 |
 | ☐ | S1.07 | [Regression metrics](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
+| ☐ | T3.8 | [Data preparation: missing data, encoding, scaling and leakage](theory/notes/02-classical-ml/T3.8-data-preparation-missing-data-encoding-scaling-and-leakage.md) | 1.5 |
 | ☐ | S1.08 | [pandas cleaning](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 3.5 |
 | ☐ | S1.09 | [pandas reshaping](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 3.5 |
 | ☐ | T0.3 | [Calculus and matrix calculus](theory/notes/01-foundations/T0.3-calculus-and-matrix-calculus.md) | 1.5 |
@@ -193,10 +196,11 @@ The next 3 unticked rows in plan order, across all three tracks. Optional rows a
 
 ## Week 3 · Project 84 days 15-21 · Sprint 2 Part A: Linear models, kNN, Naive Bayes, k-means
 
-**Hours:** 33 (Code 21.5 · Theory 5.5 · Derivations 6)
+**Hours:** 34.5 (Code 21.5 · Theory 7 · Derivations 6)
 
 | Done | ID | Item | Hours |
 | --- | --- | --- | --- |
+| ☐ | T2.3 | [Linear regression and least squares](theory/notes/02-classical-ml/T2.3-linear-regression-and-least-squares.md) | 1.5 |
 | ☐ | S2.01 | [Linear regression, closed form](code/CODE_README.md#sprint-2--days-15-28--classical-ml-by-hand) | 3.5 |
 | ☐ | D02 | [Least squares as maximum likelihood](derivation/D02-least-squares-as-maximum-likelihood.md) | 1.5 |
 | ☐ | D05 | [Ridge and lasso as MAP estimates](derivation/D05-ridge-and-lasso-as-map-estimates.md) | 1.5 |
@@ -213,7 +217,7 @@ The next 3 unticked rows in plan order, across all three tracks. Optional rows a
 
 ## Week 4 · Project 84 days 22-28 · Sprint 2 Part B: Trees, boosting, PCA and imbalanced data
 
-**Hours:** 33.5 (Code 24 · Theory 8 · Derivations 1.5)
+**Hours:** 34.5 (Code 24 · Theory 9 · Derivations 1.5)
 
 | Done | ID | Item | Hours |
 | --- | --- | --- | --- |
@@ -226,6 +230,7 @@ The next 3 unticked rows in plan order, across all three tracks. Optional rows a
 | ☐ | D06 | [PCA from maximum variance](derivation/D06-pca-from-maximum-variance.md) | 1.5 |
 | ☐ | T3.4 | [Boosting](theory/notes/02-classical-ml/T3.4-boosting.md) | 1.5 |
 | ☐ | S2.11 | [Gradient boosting ★](code/CODE_README.md#sprint-2--days-15-28--classical-ml-by-hand) | 6 |
+| ☐ | T3.7 | [Class imbalance and calibration](theory/notes/02-classical-ml/T3.7-class-imbalance-and-calibration.md) | 1 |
 | ☐ | S2.12 | [Imbalance and calibration ★](code/CODE_README.md#sprint-2--days-15-28--classical-ml-by-hand) | 6 |
 | ☐ | T2.S | [Cheat sheet M2](theory/THEORY_README.md#m2-optimization-and-regularization) | 1 |
 | ☐ | T2.Q | [Q&A M2](theory/THEORY_README.md#m2-optimization-and-regularization) | 1 |
@@ -327,10 +332,11 @@ The next 3 unticked rows in plan order, across all three tracks. Optional rows a
 
 ## Week 10 · Project 84 days 64-70 · Sprint 5 Part B: LLM client, structured output, agents, recommenders
 
-**Hours:** 20.5 (Code 19 · Theory 1.5 · Derivations 0)
+**Hours:** 21.5 (Code 19 · Theory 2.5 · Derivations 0)
 
 | Done | ID | Item | Hours |
 | --- | --- | --- | --- |
+| ☐ | T8.10 | [Calling LLM APIs reliably](theory/notes/05-llm-systems/T8.10-calling-llm-apis-reliably.md) | 1 |
 | ☐ | S5.06 | [Robust LLM client](code/CODE_README.md#sprint-5--days-57-70--retrieval-ranking-and-llm-engineering) | 6 |
 | ☐ | T8.4 | [Agents](theory/notes/05-llm-systems/T8.4-agents.md) | 1.5 |
 | ☐ | S5.07 | [Structured output](code/CODE_README.md#sprint-5--days-57-70--retrieval-ranking-and-llm-engineering) | 3.5 |
