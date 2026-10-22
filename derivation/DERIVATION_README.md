@@ -18,7 +18,7 @@ Budget about 1 to 1.5 hours each, 13.5 hours in total. These hours are not count
 
 ## How to work each one
 
-1. **Paper first.** Pen and paper. Photograph it, or retype a clean version into `derivation/DNN_name.md` in your Project 84 repo.
+1. **Paper first.** Pen and paper. Photograph it, or retype a clean version, into the derivation's note file (the `Notes:` link on its row). Put photos next to it in `derivation/`.
 2. **25-minute cap.** Stuck for 25 minutes? Take one hint, close it, then continue on your own.
 3. **Name the faked step.** Write one sentence on the step in the "Step people usually fake" row and why it is true. If you cannot, the derivation is not done.
 4. **Check numerically.** Use the small check in each entry. A few lines of NumPy are enough.
@@ -46,7 +46,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D01 · Softmax + cross-entropy gradient
 
-- [ ] **D01 · Softmax + cross-entropy gradient.** `1 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D01 · Softmax + cross-entropy gradient.** `1 h` Derived on paper, faked step named, numeric check passed. Notes: [D01-softmax-cross-entropy-gradient](D01-softmax-cross-entropy-gradient.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S3.02. Do this one before S3.02: that item asks you to derive this gradient yourself.
@@ -61,7 +61,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D02 · Least squares as maximum likelihood
 
-- [ ] **D02 · Least squares as maximum likelihood.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D02 · Least squares as maximum likelihood.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D02-least-squares-as-maximum-likelihood](D02-least-squares-as-maximum-likelihood.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S2.01, S1.15.
@@ -76,7 +76,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D03 · Logistic regression: gradient and Hessian
 
-- [ ] **D03 · Logistic regression: gradient and Hessian.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D03 · Logistic regression: gradient and Hessian.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D03-logistic-regression-gradient-and-hessian](D03-logistic-regression-gradient-and-hessian.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S2.03, S7.06.
@@ -91,7 +91,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D04 · Bias-variance decomposition
 
-- [ ] **D04 · Bias-variance decomposition.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D04 · Bias-variance decomposition.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D04-bias-variance-decomposition](D04-bias-variance-decomposition.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S2.04, S7.03.
@@ -106,7 +106,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D05 · Ridge and lasso as MAP estimates
 
-- [ ] **D05 · Ridge and lasso as MAP estimates.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D05 · Ridge and lasso as MAP estimates.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D05-ridge-and-lasso-as-map-estimates](D05-ridge-and-lasso-as-map-estimates.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S2.01, S7.05, S1.15.
@@ -121,7 +121,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D06 · PCA from maximum variance
 
-- [ ] **D06 · PCA from maximum variance.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D06 · PCA from maximum variance.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D06-pca-from-maximum-variance](D06-pca-from-maximum-variance.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S2.10.
@@ -136,7 +136,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D07 · Attention backward pass and the square-root-d scale
 
-- [ ] **D07 · Attention backward pass and the square-root-d scale.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D07 · Attention backward pass and the square-root-d scale.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D07-attention-backward-pass-and-the-square-root-d-scale](D07-attention-backward-pass-and-the-square-root-d-scale.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S4.01.
@@ -151,7 +151,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D08 · Adam's bias correction
 
-- [ ] **D08 · Adam's bias correction.** `1 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D08 · Adam's bias correction.** `1 h` Derived on paper, faked step named, numeric check passed. Notes: [D08-adams-bias-correction](D08-adams-bias-correction.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S3.09.
@@ -166,7 +166,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D09 · EM for a Gaussian mixture, via the ELBO
 
-- [ ] **D09 · EM for a Gaussian mixture, via the ELBO.** `1.5 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D09 · EM for a Gaussian mixture, via the ELBO.** `1.5 h` Derived on paper, faked step named, numeric check passed. Notes: [D09-em-for-a-gaussian-mixture-via-the-elbo](D09-em-for-a-gaussian-mixture-via-the-elbo.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S7.07.
@@ -181,7 +181,7 @@ The related code items are a static link, not a schedule: your own implementatio
 
 ## D10 · Cross-entropy, KL divergence and negative log-likelihood
 
-- [ ] **D10 · Cross-entropy, KL divergence and negative log-likelihood.** `1 h` Derived on paper, faked step named, numeric check passed.
+- [ ] **D10 · Cross-entropy, KL divergence and negative log-likelihood.** `1 h` Derived on paper, faked step named, numeric check passed. Notes: [D10-cross-entropy-kl-divergence-and-negative-log-likelihood](D10-cross-entropy-kl-divergence-and-negative-log-likelihood.md).
   - [ ] Blind re-derive, 7 days later, 15 minutes, no notes.
 
 **Related code:** S2.03, S1.15.

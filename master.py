@@ -12,6 +12,8 @@ Usage (run from anywhere; paths are relative to this file):
 
 Trackers:  code/CODE_README.md (S..)  derivation/DERIVATION_README.md (D..)  theory/THEORY_README.md (T..)
 Time log:  log.md, one row per work session: | Date | ID | Minutes |  (empty Minutes = unknown)
+Notes:     theory/notes/<area>/T<row>-<title>.md and derivation/D<nn>-<title>.md, one per row, each with a "row: .." line;
+           item titles on the README link to them
 """
 import re
 import sys
@@ -20,6 +22,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 MASTER = HERE / "README.md"
 LOG = HERE / "log.md"
+NOTES = HERE / "theory" / "notes"
+NO_NOTES = {"T7.6"}  # topic rows that deliberately have no notes chapter
 SIZE_H = {"S": 1.5, "M": 3.5, "L": 6.0}
 TRACKS = [("S", "Code"), ("T", "Theory"), ("D", "Derivations")]
 TRACK_NAME = dict(TRACKS)
@@ -84,6 +88,85 @@ def parse_log(text, items):
     return minutes, problems
 
 
+def slug(heading):
+    """GitHub-style anchor for a Markdown heading."""
+    h = re.sub(r"[^\w\- ]", "", heading.strip().lower().replace("`", "").replace("*", ""))
+    return h.replace(" ", "-")
+
+
+def parse_notes(files=None, row_pat=r"T\d\.\d"):
+    """Return ({row: notes path relative to the repo root}, problems), from each note file's row: line."""
+    links, problems = {}, []
+    for f in sorted(NOTES.glob("*/*.md")) if files is None else files:
+        rel = f.relative_to(HERE).as_posix()
+        m = re.search(rf"^row: ({row_pat})\s*$", f.read_text(encoding="utf-8"), re.M)
+        if not m:
+            # a file that is not named like a note (a scratch page, say) is ignored; a note missing its row: line is not
+            if re.match(rf"({row_pat})-", f.name):
+                problems.append(f"{rel} has no 'row: ..' line")
+            continue
+        row = m.group(1)
+        if not f.name.startswith(row + "-"):
+            problems.append(f"{rel} should start with its row ID {row}-")
+        if row in links:
+            problems.append(f"{row} is claimed by two note files")
+        links[row] = rel
+    return links, problems
+
+
+def check_links(items, notes, tracker_text, tracker_file):
+    """Each note file must belong to a tracker row, and that row must link to it."""
+    problems = []
+    base = tracker_file.rsplit("/", 1)[0] + "/"
+    for row, rel in notes.items():
+        if row not in items:
+            problems.append(f"{rel} lists {row}, which is not a row in {tracker_file}")
+            continue
+        line = next((l for l in tracker_text.splitlines() if l.startswith("- [") and f"**{row} \u00b7 " in l), "")
+        want = "(" + rel.split(base, 1)[1] + ")"
+        if want not in line:
+            problems.append(f"{tracker_file} row {row} should link {want[1:-1]}")
+    return problems
+
+
+def check_derivations(items, notes, text):
+    problems = check_links(items, notes, text, "derivation/DERIVATION_README.md")
+    for row in items:
+        if re.fullmatch(r"D\d\d", row) and row not in notes:
+            problems.append(f"{row} has no note file (add derivation/{row}-<title>.md with a 'row: {row}' line)")
+    return problems
+
+
+def check_notes(items, notes, theory_text):
+    problems = check_links(items, notes, theory_text, "theory/THEORY_README.md")
+    for row in items:
+        if re.fullmatch(r"T\d\.\d", row) and row not in NO_NOTES and not row.startswith("T9") and row not in notes:
+            problems.append(f"{row} has no notes file (add theory/notes/<area>/{row}-<title>.md with a 'row: {row}' line)")
+    return problems
+
+
+def build_links(items, notes):
+    """Where each plan row's title should point, as paths relative to the repo root."""
+    code = (HERE / "code" / "CODE_README.md").read_text(encoding="utf-8")
+    deriv = (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8")
+    theory = (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8")
+    sprint = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## Sprint (\d) \u00b7 .*$", code, re.M)}
+    derive = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## (D\d\d) \u00b7 .*$", deriv, re.M)}
+    module = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## M(\d)\. .*$", theory, re.M)}
+    links = {}
+    for i, r in items.items():
+        if r["track"] == "S" and i[1] in sprint:
+            links[i] = f"code/CODE_README.md#{sprint[i[1]]}"
+        elif r["track"] == "D" and (i in notes or i in derive):
+            links[i] = notes.get(i) or f"derivation/DERIVATION_README.md#{derive[i]}"
+        elif r["track"] == "T":
+            if i in notes:
+                links[i] = notes[i]
+            elif i[1] in module:
+                links[i] = f"theory/THEORY_README.md#{module[i[1]]}"
+    return links
+
+
 def parse_master():
     """Return list of weeks: dict(header=str, ids=[...])."""
     if not MASTER.exists():
@@ -118,8 +201,9 @@ def validate(items, weeks):
     return problems
 
 
-def render(items, weeks, intro, outro, minutes=None):
+def render(items, weeks, intro, outro, minutes=None, links=None):
     minutes = minutes or {}
+    links = links or {}
     out = []
     A = out.append
     A(intro.rstrip("\n"))
@@ -201,7 +285,8 @@ def render(items, weeks, intro, outro, minutes=None):
                 A(f"| ? | {i} | **missing from trackers** | |")
                 continue
             mark = "☑" if r["done"] else "☐"
-            title = r["title"] + (" *(optional)*" if r["opt"] else "")
+            title = f"[{r['title']}]({links[i]})" if i in links else r["title"]
+            title += " *(optional)*" if r["opt"] else ""
             A(f"| {mark} | {i} | {title} | {fmt(r['hours'])} |")
         A("")
     A("---")
@@ -214,10 +299,17 @@ def render(items, weeks, intro, outro, minutes=None):
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="replace")  # a non-ASCII log entry must not crash a cp1252 console
     check = "--check" in sys.argv
     items, problems = parse_trackers()
     weeks = parse_master()
     problems += validate(items, weeks)
+    notes, note_problems = parse_notes()
+    problems += note_problems + check_notes(items, notes, (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8"))
+    dnotes, dnote_problems = parse_notes(sorted((HERE / "derivation").glob("D??-*.md")), r"D\d\d")
+    problems += dnote_problems + check_derivations(items, dnotes, (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8"))
+    notes = {**notes, **dnotes}
     minutes, log_problems = parse_log(LOG.read_text(encoding="utf-8") if LOG.exists() else "", items)
     problems += log_problems
     if problems:
@@ -233,7 +325,7 @@ def main():
     text = MASTER.read_text(encoding="utf-8")
     intro = text[: text.index("## Progress")]
     outro = text[text.index("\n## License"):]
-    MASTER.write_text(render(items, weeks, intro, outro, minutes), encoding="utf-8", newline="\n")
+    MASTER.write_text(render(items, weeks, intro, outro, minutes, build_links(items, notes)), encoding="utf-8", newline="\n")
     print(f"README.md refreshed: {len(items)} rows, {len(weeks)} weeks.")
 
 
