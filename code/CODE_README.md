@@ -64,7 +64,7 @@ Each sprint is split into Part A and Part B, about a week each, with a table sho
 4. **Prove it.** Every item ships with a test file run by `pytest`. Where a library equivalent exists (NumPy, scikit-learn, PyTorch), your output must match it within a stated tolerance (default `1e-6`).
 5. **One commit per item**, message format: `S1.03: stratified split`.
 6. **Scope lock.** If a sprint runs long, cut what its *If you fall behind* line names, starting with the decision tree items (S2.07-S2.09) in Sprint 2. Never add items mid-sprint; park ideas in `PARKED.md`.
-7. **Defend it.** Optional, best for `M` and `L` items. Once an item is committed and its tests pass, ask an AI to critique it, not to fix it: numerical stability, edge cases, time and memory cost, and why each line is needed. Answer each point yourself. If you want a record, keep it in `code/critiques/<ID>.md`, one file per item, and add a new run when you critique again instead of overwriting the old one. Fixes go in a new commit, for example `S1.05: fix after critique`.
+7. **Defend it.** Optional, best for `M` and `L` items. Once an item is committed and its tests pass, ask an AI to critique it, not to fix it: numerical stability, edge cases, time and memory cost, and why each line is needed. Tick agree / disagree / will fix / won't fix on each point, with a one-line note only when you disagree. If you want a record, keep it in `code/critiques/<ID>.md`, one file per item, and add a new run when you critique again instead of overwriting the old one. Fixes go in a new commit, for example `S1.05: fix after critique`.
 
 ## Repo layout
 
