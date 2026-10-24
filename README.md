@@ -131,10 +131,10 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 
 | Track | Required rows done | Hours done | Hours in plan | Actual hours logged | Actual / planned |
 | --- | --- | --- | --- | --- | --- |
-| Code | 4 / 103 | 6 | 369.5 | 0 | - |
+| Code | 5 / 103 | 7.5 | 369.5 | 0 | - |
 | Theory | 0 / 73 | 0 | 124.5 | 0 | - |
 | Derivations | 0 / 10 | 0 | 13.5 | 0 | - |
-| **All** | **4 / 186** | **6** | **507.5** | **0** | **-** |
+| **All** | **5 / 186** | **7.5** | **507.5** | **0** | **-** |
 
 *Actual / planned* compares logged time with the size tags, for finished rows that have minutes in `log.md`.
 
@@ -161,7 +161,7 @@ The next 3 unticked rows in plan order, across all three tracks. Optional rows a
 | ☑ | S1.03 | [Data splits](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☑ | S1.04 | [k-fold cross-validation](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☐ | T3.6 | [Evaluation](theory/notes/02-classical-ml/T3.6-evaluation.md) | 2 |
-| ☐ | S1.05 | [Classification metrics from raw arrays](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
+| ☑ | S1.05 | [Classification metrics from raw arrays](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☐ | S1.06 | [ROC-AUC from scores](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 3.5 |
 | ☐ | S1.07 | [Regression metrics](code/CODE_README.md#sprint-1--days-1-14--numpy-data-and-statistics-fluency) | 1.5 |
 | ☐ | T3.8 | [Data preparation: missing data, encoding, scaling and leakage](theory/notes/02-classical-ml/T3.8-data-preparation-missing-data-encoding-scaling-and-leakage.md) | 1.5 |

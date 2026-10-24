@@ -109,7 +109,7 @@ Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only whe
 
 - [x] **S1.04 · k-fold cross-validation.** `S` Write a generator `kfold(n, k, shuffle, seed)` yielding `(train_idx, val_idx)` pairs. Every index must appear in exactly one validation fold. Then write `cross_val_score(model_fn, X, y, k, metric)` that trains a fresh model per fold and returns the per-fold scores. *Test:* fold union equals all indices; folds are disjoint; sizes differ by at most one; `cross_val_score` runs with a trivial mean-predicting model.
 
-- [ ] **S1.05 · Classification metrics from raw arrays.** `S` Given `y_true` and `y_pred` (binary and multiclass), compute accuracy, confusion matrix, precision, recall, F1, and macro/micro averages. When a class is never predicted, return 0 for its precision. *Test:* matches `sklearn.metrics` (with `zero_division=0`) on five random cases, including one where a class has no predictions.
+- [x] **S1.05 · Classification metrics from raw arrays.** `S` Given `y_true` and `y_pred` (binary and multiclass), compute accuracy, confusion matrix, precision, recall, F1, and macro/micro averages. When a class is never predicted, return 0 for its precision. *Test:* matches `sklearn.metrics` (with `zero_division=0`) on five random cases, including one where a class has no predictions.
 
 - [ ] **S1.06 · ROC-AUC from scores.** `M` Given binary `y_true` and continuous `scores`, compute the ROC curve (FPR, TPR at every threshold) and AUC by the trapezoidal rule. Then compute AUC a second way: the probability a random positive outranks a random negative, counting ties as half. *Test:* both methods agree with each other and with `roc_auc_score`, including on scores with ties.
 
