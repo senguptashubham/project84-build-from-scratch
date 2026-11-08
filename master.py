@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh README.md (the master sequence) from the three tracker files.
+"""Refresh README.md (the master sequence) from the two tracker files.
 
 README.md owns the sequence: the week blocks and the order of IDs inside them.
 The text above the "## Progress" heading and the License section are hand-written
@@ -9,11 +9,11 @@ totals) is copied from the tracker files, so you never edit those by hand.
 Usage (run from anywhere; paths are relative to this file):
     python master.py            refresh README.md in place
     python master.py --check    validate only; exit 1 on any problem
-    python master.py --sync-notes   copy each theory row's text and each derivation's Derive: line into its note's description: field
+    python master.py --sync-notes   copy each derivation's Derive: line into its note's description: field
 
-Trackers:  code/CODE_README.md (S..)  derivation/DERIVATION_README.md (D..)  theory/THEORY_README.md (T..)
+Trackers:  code/CODE_README.md (S..)  derivation/DERIVATION_README.md (D..)
 Time log:  log.md, one row per work session: | Date | ID | Minutes |  (empty Minutes = unknown)
-Notes:     theory/notes/<area>/T<row>-<title>.md and derivation/D<nn>-<title>.md, one per row, each with a "row: .." line;
+Notes:     derivation/D<nn>-<title>.md, one per derivation, each with a "row: .." line;
            item titles on the README link to them
 """
 import json
@@ -25,13 +25,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 MASTER = HERE / "README.md"
 LOG = HERE / "log.md"
-NOTES = HERE / "theory" / "notes"
-NO_NOTES = {"T7.6"}  # topic rows that deliberately have no notes chapter
 SIZE_H = {"S": 1.5, "M": 3.5, "L": 6.0}
-TRACKS = [("S", "Code"), ("T", "Theory"), ("D", "Derivations")]
+TRACKS = [("S", "Code"), ("D", "Derivations")]
 TRACK_NAME = dict(TRACKS)
 NEXT_UP = 3
-ID_RE = r"[SDT]\d[0-9.SQ]*"
+ID_RE = r"[SD]\d[0-9.]*"
 
 
 def fmt(x):
@@ -54,9 +52,9 @@ def parse_trackers():
         if m.group(3):
             title += " ★"
         add(m.group(2), dict(track="S", title=title, hours=SIZE_H[m.group(5)], opt=False, done=m.group(1) in "xX"), "code/CODE_README.md")
-    # Others
+    # Derivations
     pat2 = re.compile(r"^- \[( |x|X)\] \*\*(" + ID_RE + r") · (.*?)\*\* (`opt` )?`([\d.]+) h`", re.M)
-    for fname, letter in (("derivation/DERIVATION_README.md", "D"), ("theory/THEORY_README.md", "T")):
+    for fname, letter in (("derivation/DERIVATION_README.md", "D"),):
         text = (HERE / fname).read_text(encoding="utf-8")
         for m in pat2.finditer(text):
             i = m.group(2)
@@ -101,12 +99,6 @@ def slug(heading):
     return h.replace(" ", "-")
 
 
-def tracker_descriptions(tracker_text):
-    """Map each theory row to the description text after its hours tag, without the trailing Notes: link."""
-    pat = r"^- \[.\] \*\*(T\d\.\d+) · .*?\*\* (?:`opt` )?`[\d.]+ h` (.*?)(?: Notes: \[[^\]]*\]\([^)]*\)\.)?$"
-    return {m.group(1): m.group(2).strip() for m in re.finditer(pat, tracker_text, re.M)}
-
-
 def derivation_descriptions(deriv_text):
     """Map each derivation to the text of its '**Derive:**' line."""
     out = {}
@@ -145,8 +137,8 @@ def note_description(note_text):
     return value
 
 
-def check_descriptions(notes, want, source="theory/THEORY_README.md"):
-    """Each note's description: field must equal the text it mirrors (a row, or a derivation's Derive: line)."""
+def check_descriptions(notes, want, source):
+    """Each note's description: field must equal the text it mirrors (a derivation's Derive: line)."""
     problems = []
     for row, rel in notes.items():
         have = note_description((HERE / rel).read_text(encoding="utf-8"))
@@ -176,10 +168,10 @@ def sync_descriptions(notes, want):
     return changed
 
 
-def parse_notes(files=None, row_pat=r"T\d\.\d+"):
+def parse_notes(files, row_pat=r"D\d\d"):
     """Return ({row: notes path relative to the repo root}, problems), from each note file's row: line."""
     links, problems = {}, []
-    for f in sorted(NOTES.glob("*/*.md")) if files is None else files:
+    for f in files:
         rel = f.relative_to(HERE).as_posix()
         m = re.search(rf"^row: ({row_pat})\s*$", f.read_text(encoding="utf-8"), re.M)
         if not m:
@@ -219,33 +211,18 @@ def check_derivations(items, notes, text):
     return problems
 
 
-def check_notes(items, notes, theory_text):
-    problems = check_links(items, notes, theory_text, "theory/THEORY_README.md")
-    for row in items:
-        if re.fullmatch(r"T\d\.\d+", row) and row not in NO_NOTES and not row.startswith("T9") and row not in notes:
-            problems.append(f"{row} has no notes file (add theory/notes/<area>/{row}-<title>.md with a 'row: {row}' line)")
-    return problems
-
-
 def build_links(items, notes):
     """Where each plan row's title should point, as paths relative to the repo root."""
     code = (HERE / "code" / "CODE_README.md").read_text(encoding="utf-8")
     deriv = (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8")
-    theory = (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8")
-    sprint = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## Sprint (\d) \u00b7 .*$", code, re.M)}
-    derive = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## (D\d\d) \u00b7 .*$", deriv, re.M)}
-    module = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## M(\d)\. .*$", theory, re.M)}
+    sprint = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## Sprint (\d) · .*$", code, re.M)}
+    derive = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## (D\d\d) · .*$", deriv, re.M)}
     links = {}
     for i, r in items.items():
         if r["track"] == "S" and i[1] in sprint:
             links[i] = f"code/CODE_README.md#{sprint[i[1]]}"
         elif r["track"] == "D" and (i in notes or i in derive):
             links[i] = notes.get(i) or f"derivation/DERIVATION_README.md#{derive[i]}"
-        elif r["track"] == "T":
-            if i in notes:
-                links[i] = notes[i]
-            elif i[1] in module:
-                links[i] = f"theory/THEORY_README.md#{module[i[1]]}"
     return links
 
 
@@ -338,7 +315,7 @@ def render(items, weeks, intro, outro, minutes=None, links=None):
         for i in w["ids"]:
             week_of[i] = wi
             order.append(i)
-    A(f"The next {NEXT_UP} unticked rows in plan order, across all three tracks. Optional rows are skipped.")
+    A(f"The next {NEXT_UP} unticked rows in plan order, across both tracks. Optional rows are skipped.")
     A("")
     upcoming = [i for i in order if i in items and not items[i]["done"] and not items[i]["opt"]][:NEXT_UP]
     for n, i in enumerate(upcoming, 1):
@@ -387,20 +364,16 @@ def main():
     items, problems = parse_trackers()
     weeks = parse_master()
     problems += validate(items, weeks)
-    notes, note_problems = parse_notes()
-    theory_text = (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8")
     deriv_text = (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8")
     dnotes, dnote_problems = parse_notes(sorted((HERE / "derivation").glob("D??-*.md")), r"D\d\d")
     if "--sync-notes" in sys.argv:
-        changed = sync_descriptions(notes, tracker_descriptions(theory_text)) + sync_descriptions(dnotes, derivation_descriptions(deriv_text))
+        changed = sync_descriptions(dnotes, derivation_descriptions(deriv_text))
         print(f"{len(changed)} note description(s) refreshed from the trackers.")
         for rel in changed:
             print(" -", rel)
         return
-    problems += note_problems + check_notes(items, notes, theory_text) + check_descriptions(notes, tracker_descriptions(theory_text))
     problems += dnote_problems + check_derivations(items, dnotes, deriv_text)
     problems += check_descriptions(dnotes, derivation_descriptions(deriv_text), "the 'Derive:' line in derivation/DERIVATION_README.md")
-    notes = {**notes, **dnotes}
     minutes, log_problems = parse_log(LOG.read_text(encoding="utf-8") if LOG.exists() else "", items)
     problems += log_problems
     if problems:
@@ -416,7 +389,7 @@ def main():
     text = MASTER.read_text(encoding="utf-8")
     intro = text[: text.index("## Progress")]
     outro = text[text.index("\n## License"):]
-    MASTER.write_text(render(items, weeks, intro, outro, minutes, build_links(items, notes)), encoding="utf-8", newline="\n")
+    MASTER.write_text(render(items, weeks, intro, outro, minutes, build_links(items, dnotes)), encoding="utf-8", newline="\n")
     print(f"README.md refreshed: {len(items)} rows, {len(weeks)} weeks.")
 
 
