@@ -31,11 +31,7 @@ Data structures and algorithms. Many companies, especially in India, still open 
 
 <!-- progress:start -->
 
-| Track | Rows done | Hours done | Hours in plan |
-| --- | --- | --- | --- |
-| Code | 5 / 103 | 7.5 | 369.5 |
-| Derivations | 0 / 10 | 0 | 13.5 |
-| **All** | **5 / 113** | **7.5** | **383** |
+![Progress: 5 of 113 rows done](assets/progress.svg)
 
 Hours come from the size tags and are planning numbers only; nothing is timed.
 
@@ -141,11 +137,13 @@ Weeks 1-12 are seven days; weeks 13-18 are six. With six days, expect to slide a
 
 ```
 README.md                this page: rules, progress, and every item in order
-master.py                refreshes the Progress section from the checkboxes; --days shows your commit days
+master.py                refreshes the Progress section and the picture from the checkboxes; --days shows your commit days
+progress_chart.py        draws assets/progress.svg, the colourful progress picture
 tests/                   tests for master.py and for the page's links
 bootstrap.py             one-time setup after cloning (enables the hook)
 .githooks/pre-commit     runs master.py on every commit
 .github/workflows/       CI: master.py --check and pytest on every push
+assets/progress.svg      the progress picture (generated, do not edit)
 requirements.txt
 pyproject.toml           pytest config (import paths: code/ and the repo root)
 PARKED.md                ideas that are outside the plan

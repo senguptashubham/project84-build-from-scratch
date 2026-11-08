@@ -44,6 +44,8 @@ def test_the_plan_is_valid_and_the_progress_section_is_current():
     assert sum(r["track"] == "S" for r in items.values()) == 103
     assert sum(r["track"] == "D" for r in items.values()) == 10
     assert master.splice(text, master.render_block(items, weeks)) == text
+    svg = (ROOT / "assets" / "progress.svg").read_bytes()
+    assert svg == master.progress_chart.render_svg(items, weeks).encode("utf-8")
 
 
 def test_a_derivation_is_placed_with_the_code_it_relates_to():

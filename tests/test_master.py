@@ -52,11 +52,33 @@ def test_a_malformed_item_row_is_reported_not_skipped():
     assert any("X1.03" in p and "malformed" in p for p in problems)
 
 
-def test_progress_table_counts_rows_and_planned_hours():
+def test_progress_block_embeds_the_picture_with_counts_in_its_alt_text():
     items, weeks, _ = master.parse_readme(PAGE)
     out = master.render_block(items, weeks)
-    assert next(l for l in out.splitlines() if l.startswith("| Code |")) == "| Code | 1 / 3 | 1.5 | 11 |"
+    assert "![Progress: 1 of 4 rows done](assets/progress.svg)" in out
     assert "Actual" not in out
+
+
+def test_the_svg_is_valid_xml_shows_the_counts_and_is_deterministic():
+    import xml.etree.ElementTree as ET
+
+    items, weeks, _ = master.parse_readme(PAGE)
+    svg = master.progress_chart.render_svg(items, weeks)
+    root = ET.fromstring(svg)
+    assert root.tag.endswith("svg")
+    assert "1 of 4 rows done" in svg and "25%" in svg
+    assert svg == master.progress_chart.render_svg(items, weeks)
+    assert "<script" not in svg and "foreignObject" not in svg  # GitHub would drop them
+
+
+def test_the_svg_handles_nothing_done_and_everything_done():
+    import xml.etree.ElementTree as ET
+
+    items, weeks, _ = master.parse_readme(PAGE)
+    for flag in (False, True):
+        for r in items.values():
+            r["done"] = flag
+        ET.fromstring(master.progress_chart.render_svg(items, weeks))
 
 
 def test_render_is_deterministic_and_lists_next_up_in_plan_order():

@@ -20,9 +20,12 @@ from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
 
+import progress_chart
+
 HERE = Path(__file__).resolve().parent
 README = HERE / "README.md"
 DERIV = HERE / "derivation"
+CHART = HERE / "assets" / "progress.svg"
 START, END = "<!-- progress:start -->", "<!-- progress:end -->"
 SIZE_H = {"S": 1.5, "M": 3.5, "L": 6.0}
 TRACKS = [("S", "Code"), ("D", "Derivations")]
@@ -116,13 +119,8 @@ def render_block(items, weeks):
             hours_done=sum(items[i]["hours"] for i in done),
         )
 
-    A("| Track | Rows done | Hours done | Hours in plan |")
-    A("| --- | --- | --- | --- |")
-    for tr, name in TRACKS:
-        s = stats[tr]
-        A(f"| {name} | {s['done']} / {s['rows']} | {fmt(s['hours_done'])} | {fmt(s['hours'])} |")
     tot = lambda k: sum(s[k] for s in stats.values())
-    A(f"| **All** | **{tot('done')} / {tot('rows')}** | **{fmt(tot('hours_done'))}** | **{fmt(tot('hours'))}** |")
+    A("![Progress: " + f"{tot('done')} of {tot('rows')} rows done" + "](assets/progress.svg)")
     A("")
     A("Hours come from the size tags and are planning numbers only; nothing is timed.")
     A("")
@@ -191,9 +189,12 @@ def main():
     text = README.read_text(encoding="utf-8")
     items, weeks, problems = parse_readme(text)
     problems += check_notes(items)
-    new = None
+    new = svg = None
     if not problems:
         new = splice(text, render_block(items, weeks))
+        svg = progress_chart.render_svg(items, weeks)
+        if check and (not CHART.exists() or CHART.read_bytes() != svg.encode("utf-8")):
+            problems.append("assets/progress.svg is missing or out of date (run: python master.py)")
         if new is None:
             problems.append(f"README.md needs the markers {START} and {END} (in that order) under '## Progress'")
         elif check and new != text:
@@ -209,7 +210,9 @@ def main():
         print("OK")
         return
     README.write_text(new, encoding="utf-8", newline="\n")
-    print(f"README.md refreshed: {len(items)} rows, {len(weeks)} weeks.")
+    CHART.parent.mkdir(exist_ok=True)
+    CHART.write_text(svg, encoding="utf-8", newline="\n")
+    print(f"README.md and assets/progress.svg refreshed: {len(items)} rows, {len(weeks)} weeks.")
 
 
 if __name__ == "__main__":
