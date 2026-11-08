@@ -27,7 +27,7 @@ The trackers hold the details and the checkboxes. This page holds only the order
 
 ## Daily rules
 
-1. **One commit a day that moves a sprint problem forward.** Take the next unticked code row from "Next up" and push it a step closer to done. Finishing it takes as many days as it takes.
+1. **Aim for one commit a day that moves a sprint problem forward.** Take the next unticked code row from "Next up" and push it a step closer to done. Finishing it takes as many days as it takes, and a missed day is fine.
 2. **Read just enough.** Look up the theory you need to solve the problem, from the book or paper of your choice, and no more. No notes are required.
 3. **Stuck for 45 minutes? Ask for hints or steps, never code.** First spend 10 minutes on paper, then ask. This is rule 2 in [code/CODE_README.md](code/CODE_README.md#rules).
 4. **Optional log.** If something tripped you, put 2 to 3 lines at the top of the solution file under `Looked up:`. A log, not notes, and never required.
