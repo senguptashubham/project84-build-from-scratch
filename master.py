@@ -238,7 +238,8 @@ def parse_master():
             continue
         if cur is None:
             continue
-        m = re.match(r"^\|\s*(?:☑|☐)?\s*\|\s*(" + ID_RE + r")\s*\|", line)
+        # any letter prefix, so a stale row (an old T-row, say) is reported by validate() instead of silently dropped
+        m = re.match(r"^\|\s*(?:☑|☐)?\s*\|\s*([A-Z]\d[0-9.A-Z]*)\s*\|", line)
         if m:
             cur["ids"].append(m.group(1))
     return weeks

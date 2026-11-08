@@ -165,3 +165,17 @@ def test_log_rejects_nan_inf_and_negative_minutes():
     text = "| Date | ID | Minutes |\n| | S1.01 | nan |\n| | S1.01 | inf |\n| | S1.01 | -5 |\n| | S1.01 | 30 |\n"
     minutes, problems = master.parse_log(text, items)
     assert minutes == {"S1.01": 30.0} and len(problems) == 3
+
+
+def test_stale_row_with_an_unknown_prefix_is_reported_not_dropped(tmp_path):
+    readme = tmp_path / "README.md"
+    rows = ["## Week 1 · t", "", "| Done | ID | Item | Hours |", "| --- | --- | --- | --- |",
+            "| ☐ | S1.01 | a | 1.5 |", "| ☐ | T0.1 | old theory row | 1 |", ""]
+    readme.write_text(chr(10).join(rows), encoding="utf-8")
+    old, master.MASTER = master.MASTER, readme
+    try:
+        weeks = master.parse_master()
+    finally:
+        master.MASTER = old
+    assert weeks[0]["ids"] == ["S1.01", "T0.1"]
+    assert master.validate({"S1.01": ITEMS["S1.01"]}, weeks) == ["T0.1 (Week 1) is not in any tracker file"]
