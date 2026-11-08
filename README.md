@@ -1,39 +1,47 @@
 # Project 84: Build ML and AI Engineering From Scratch
 
-A 120-day plan for becoming able to build ML and AI engineering work without an AI assistant, with the maths and theory underneath it. It runs three tracks side by side: **code** (103 problems, from NumPy to transformers to a working retrieval-augmented generation app), **theory** (nine modules plus a consolidation module, each with a cheat sheet and Q&A) and **derivations** (ten on-paper derivations). This page puts all three in one order, week by week. The project keeps its original name, Project 84, after its first 84 days: Sprints 1-6 (Days 1-84) are the core ladder, and Sprints 7-9 (Days 85-120) extend it.
+A 120-day plan for becoming able to build ML and AI engineering work without an AI assistant, and to explain why it works. It runs two tracks side by side: **code** (103 problems, from NumPy to transformers to a working retrieval-augmented generation app) and **derivations** (ten on-paper derivations). This page puts both in one order, week by week. The project keeps its original name, Project 84, after its first 84 days: Sprints 1-6 (Days 1-84) are the core ladder, and Sprints 7-9 (Days 85-120) extend it.
+
+A third track, theory (modules M0 to M9 with notes, cheat sheets and Q&A), was retired in Nov 2026 to keep the plan lean. It lives on, unchanged, in [archive/](archive/README.md). Book reading (MML, Murphy PML, D2L) now happens outside this repo and is not tracked here.
 
 ## Why
 
-AI assistants make it easy to ship code you couldn't write yourself. That is fine for getting work done, but interviews, debugging and research all depend on what you can build from a blank file and what you can explain from first principles. This plan rebuilds both, one small, testable piece at a time: the code items are drawn from what ML and AI engineering interviews commonly ask candidates to implement from scratch, and the theory and derivations cover the reasoning those interviews probe next.
+AI assistants make it easy to ship code you couldn't write yourself. That is fine for getting work done, but interviews, debugging and research all depend on what you can build from a blank file and what you can explain from first principles. This plan rebuilds both, one small, testable piece at a time: the code items are drawn from what ML and AI engineering interviews commonly ask candidates to implement from scratch, and the derivations cover the reasoning those interviews probe next.
 
 ## Who it's for
 
-Anyone comfortable with basic Python (functions, classes, list comprehensions) who has met the core ML ideas (loss functions, gradient descent, train/test splits) and wants to write them without help and explain why they work. If a concept in a code item is new to you, the theory track introduces it just ahead of the item that needs it.
+Anyone comfortable with basic Python (functions, classes, list comprehensions) who has met the core ML ideas (loss functions, gradient descent, train/test splits) and wants to write them without help. If a concept in a code item is new to you, read just enough about it to solve the item.
 
 ## What this doesn't cover
 
 Data structures and algorithms. Many companies, especially in India, still open ML interviews with a standard coding round, but it is a separate skill with good tracked resources already. Work through a list like [NeetCode 150](https://neetcode.io/practice) alongside this plan, and budget roughly 10 hours a week for it on top of the hours below. It is deliberately not tracked here.
 
-## The three tracks
+## The two tracks
 
 | Track | File | IDs | What it holds |
 | --- | --- | --- | --- |
 | Code | [code/CODE_README.md](code/CODE_README.md) | S1.01 to S9.10 | The 103 problem statements, the rules, setup and the cut line for each sprint |
-| Theory | [theory/THEORY_README.md](theory/THEORY_README.md) | T0.1 to T9.4 | Ten modules (M0 to M9): readings, a cheat sheet and a Q&A set for each |
 | Derivations | [derivation/DERIVATION_README.md](derivation/DERIVATION_README.md) | D01 to D10 | Ten derivations to do on paper, each with a blind re-derive check |
 
 The trackers hold the details and the checkboxes. This page holds only the order. When you finish something, tick it once, in its tracker file, and run `python master.py` to copy the tick onto this page.
+
+## Daily rules
+
+1. **One commit a day that moves a sprint problem forward.** Take the next unticked code row from "Next up" and push it a step closer to done. Finishing it takes as many days as it takes.
+2. **Read just enough.** Look up the theory you need to solve the problem, from the book or paper of your choice, and no more. No notes are required.
+3. **Stuck for 45 minutes? Ask for hints or steps, never code.** First spend 10 minutes on paper, then ask. This is rule 2 in [code/CODE_README.md](code/CODE_README.md#rules).
+4. **Optional log.** If something tripped you, put 2 to 3 lines at the top of the solution file under `Looked up:`. A log, not notes, and never required.
+5. **Derivations stay on paper.** They are scheduled in the weeks below, right after the code they explain.
 
 ## At a glance
 
 | Track | Items | Hours |
 | --- | --- | --- |
 | Code | 103 | 369.5 |
-| Theory | 76 (3 optional) | 124.5 |
 | Derivations | 10 | 13.5 |
-| **Total** | **189** | **507.5** |
+| **Total** | **113** | **383** |
 
-That averages about 28 hours a week over 18 weeks, but the load is front-heavy on purpose: weeks 1-9 run 29-35.5 hours, and weeks 10-18 are lighter (21-28 hours), which leaves room to catch up. The weekly hours are on each week's header below. Each week is one Part of a Project 84 sprint.
+That averages about 21 hours a week over 18 weeks. Weeks run 18-27.5 hours, which leaves room to catch up. The weekly hours are on each week's header below. Each week is one Part of a Project 84 sprint.
 
 | Sprint | Days | Theme | Code items | Code hours |
 | --- | --- | --- | --- | --- |
@@ -62,35 +70,34 @@ That averages about 28 hours a week over 18 weeks, but the load is front-heavy o
 
    The commit hook refreshes this page on every commit. Conda works as well as `venv`: create and activate an environment, then run the last two commands. Packages for later sprints are listed in [code/CODE_README.md](code/CODE_README.md#setup); install each when you reach it.
 2. Each day, open this page, find your week and take the next unticked rows. Do them in the order shown; the order is the point.
-3. Click an item's title for its details: theory topics and derivations open their note file, code items open their sprint section in the code tracker. Do the item, tick it in the tracker file, and add a line to `log.md` with your minutes.
+3. Click an item's title for its details: derivations open their note file, code items open their sprint section in the code tracker. Do the item, tick it in the tracker file, and add a line to `log.md` with your minutes.
 4. Commit the work and the tick. The commit hook runs `master.py` and adds the refreshed `README.md` to the same commit; if the trackers disagree with this page, it stops the commit and says why. You can also run `python master.py` or `python master.py --check` by hand.
 5. Missing a day is fine. Finishing is what matters. On a bad day, 25 minutes on the current item still counts as a session. Unfinished rows slide into the next week; nothing is dropped.
 6. At the end of each week, run `pytest` on that sprint's folder and fix anything that broke. That is the checkpoint. If you have spare time, redo one finished code item from a couple of weeks earlier from a blank file in `code/rewrites/`, in 60 minutes at most. Favour the items the final exams lean on, such as k-means, logistic regression and attention. A redo is not a plan item and has no checkbox.
-7. Read a paper that touches the plan? Fold what matters into the specs of the items where it adds real understanding or a test worth having, tagged `(arXiv <id>)`, so you meet it when you get there. A small result may touch two items; a big one may touch ten. Untick a finished item whose spec changes, so it shows up as open work again. Interview questions go under `## From research` in `theory/qa/M<n>.md`. Use `PARKED.md` only for ideas outside the plan. A personal Claude Code command, `/research <url>`, kept in the git-ignored `.claude/` folder, automates this: it proposes changes and writes only the ones you pick.
+7. Read a paper that touches the plan? Fold what matters into the specs of the items where it adds real understanding or a test worth having, tagged `(arXiv <id>)`, so you meet it when you get there. A small result may touch two items; a big one may touch ten. Untick a finished item whose spec changes, so it shows up as open work again. Use `PARKED.md` only for ideas outside the plan. A personal Claude Code command, `/research <url>`, kept in the git-ignored `.claude/` folder, automates this: it proposes changes and writes only the ones you pick.
 
 **Calibrate early.** After S1.04-S1.07, look at the *Actual / planned* column in the Progress table below (it is filled from `log.md`). If it is 1.5 or more, treat every week's hours as 1.5 times larger and start using the *If you fall behind* lines from the first sprint instead of waiting.
 
 ## How the sequence works
 
-- Theory is placed just ahead of the first code item that uses it, so you meet an idea before you implement it, and the three tracks are interleaved inside each week. A derivation comes right after the code it explains, and never before the theory it needs. The one exception is D01, which comes before S3.02 because S3.02 asks you to derive that gradient yourself.
-- Some topics sit in a later week than the rest of their module (for example T4.5 and T7.4), so they arrive just before the code that uses them. When you do one, add it to that module's cheat sheet.
+- The two tracks are interleaved inside each week. A derivation comes right after the code it explains. The one exception is D01, which comes before S3.02 because S3.02 asks you to derive that gradient yourself.
 - "Next up" lists the next three unticked rows in plan order, whichever track they belong to.
 - Rows marked *(optional)* never block "Next up"; skip them when time is short.
 - Weeks 1-12 are seven days; weeks 13-18 are six. The plan assumes a full working week. With six days, expect to slide about one row in six into the next week.
 - Weekly hours include optional rows.
-- When you fall behind, use the *If you fall behind* lines in `code/CODE_README.md` and the cut order in `theory/THEORY_README.md`. Cutting a code item does not cut its derivation.
+- When you fall behind, use the *If you fall behind* lines in `code/CODE_README.md`. Cutting a code item does not cut its derivation.
 
 ## Rules for the code track
 
-The seven rules live in one place, [code/CODE_README.md](code/CODE_README.md#rules): blank file every time, the 30-minute rule, the rewrite rule, prove it with tests, one commit per item, scope lock, and the optional critique. This page does not repeat them, so they cannot drift apart.
+The eight rules live in one place, [code/CODE_README.md](code/CODE_README.md#rules): blank file every time, the 45-minute rule, the rewrite rule, prove it with tests, one commit per item, scope lock, the optional critique and the optional `Looked up:` log. This page does not repeat them, so they cannot drift apart.
 
-Derivations and theory have their own working rules at the top of their tracker files.
+Derivations have their own working rules at the top of their tracker file.
 
 ## Repo layout
 
 ```
 README.md                this page (sequence and progress)
-master.py                refreshes this page from the three trackers
+master.py                refreshes this page from the two trackers
 log.md                   your minutes per item (read by master.py)
 tests/                   tests for master.py
 bootstrap.py             one-time setup after cloning (enables the hook)
@@ -115,15 +122,12 @@ code/
     sprint9_retrieval_serving_breadth/
     rewrites/
     critiques/           optional critique notes, one file per item
-theory/
-    THEORY_README.md     theory tracker
-    notes/               one notes file per theory row, in five area folders
-    cheatsheets/         M0.md ... M8.md, ALL.md
-    qa/                  M0.md ... M8.md
-    assets/              images and diagrams pasted into notes
 derivation/
     DERIVATION_README.md derivations tracker
     D01-<title>.md ... D10-<title>.md   one note file per derivation (scans or photos can sit beside them)
+archive/
+    README.md            what was retired and why
+    theory/              the retired theory track, kept unchanged
 ```
 
 Solutions are `.py` modules with a matching `test_*.py`. Use a notebook only where an item asks for plots or a written report, and keep any logic it tests in a `.py` file.
