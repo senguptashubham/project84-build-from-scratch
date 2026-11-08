@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D05
-description: Show that a Gaussian prior on `w` gives ridge regression and a Laplace prior gives lasso, and find how `λ` relates to the noise and prior scales. Then show the ridge solution is `(XᵀX + λI)⁻¹Xᵀy` and how SVD shows each component being shrunk.
 ---
 # D05 · Ridge and lasso as MAP estimates
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d05--ridge-and-lasso-as-map-estimates). Related code: S2.01, S7.05, S1.15.
+Row and **Derive:** statement: [README.md](../README.md#week-3--days-15-21--part-a-linear-models-knn-naive-bayes-k-means). Related code: S2.01, S7.05, S1.15.
+
+## The target
+
+**Intuition:** A prior says what weights you believe before seeing data. A Laplace prior has a sharp peak at zero, which is why lasso sets weights exactly to zero.
+
+**Step people usually fake:** Taking the negative log of the prior and tracking the scaling. Also why the kink of `|w|` at zero produces exact zeros while `w²` does not.
+
+**Check:** With `XᵀX = I`, take the lasso objective `½‖y − Xw‖² + λ‖w‖₁` and the ridge objective `‖y − Xw‖² + λ‖w‖²` (the one whose solution is `(XᵀX + λI)⁻¹Xᵀy`). Lasso should reduce to soft-thresholding the least-squares coefficients at λ, and ridge to dividing them by `1 + λ`. For example, coefficients `(1.5, −0.3, 0.8)` with `λ = 0.5` give lasso `(1.0, 0, 0.3)` and ridge `(1.0, −0.2, 0.533)`. Finish the lasso check against your code at S7.05.
 
 ## Derivation
 

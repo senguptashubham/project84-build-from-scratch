@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D01
-description: For logits `z`, `p = softmax(z)` and a one-hot label `y`, the loss is `L = -Σ yₖ log pₖ`. Show that `∂L/∂z = p − y`.
 ---
 # D01 · Softmax + cross-entropy gradient
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d01--softmax--cross-entropy-gradient). Related code: S3.02. Do this one before S3.02: that item asks you to derive this gradient yourself.
+Row and **Derive:** statement: [README.md](../README.md#week-5--days-29-35--part-a-neural-networks-from-scratch-in-numpy). Related code: S3.02. Do this one before S3.02: that item asks you to derive this gradient yourself.
+
+## The target
+
+**Intuition:** The gradient pushes down the logits of classes that got too much probability and pushes up the true class. It is exactly zero when `p = y`.
+
+**Step people usually fake:** The softmax Jacobian, `∂pᵢ/∂zⱼ = pᵢ(δᵢⱼ − pⱼ)`. People jump to the clean answer without showing why the sum over classes collapses. It collapses because `Σ yₖ = 1`.
+
+**Check:** Logits `(2, 1, 0)` with the true class 0 give `p ≈ (0.665, 0.245, 0.090)`, so the gradient is about `(−0.335, 0.245, 0.090)`. Compare against finite differences or PyTorch autograd.
 
 ## Derivation
 

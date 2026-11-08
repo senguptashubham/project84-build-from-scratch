@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D08
-description: With `m₀ = 0` and `mₜ = β mₜ₋₁ + (1 − β) gₜ`, show that if the gradient has a constant mean `μ`, then `E[mₜ] = (1 − βᵗ) μ`. That is why Adam divides by `1 − βᵗ`. Do the same for the second moment.
 ---
 # D08 · Adam's bias correction
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d08--adams-bias-correction). Related code: S3.09.
+Row and **Derive:** statement: [README.md](../README.md#week-6--days-36-42--part-b-pytorch-workflow-optimizers-convolution-debugging). Related code: S3.09.
+
+## The target
+
+**Intuition:** Starting the running average at zero drags early estimates toward zero. The correction removes that drag.
+
+**Step people usually fake:** Unrolling the recursion into a geometric sum, and stating the assumption that the gradients are stationary.
+
+**Check:** At `t = 1`, the corrected estimate should equal `g₁` exactly.
 
 ## Derivation
 

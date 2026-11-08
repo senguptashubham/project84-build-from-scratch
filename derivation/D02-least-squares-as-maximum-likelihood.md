@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D02
-description: Assume `y = Xw + ε` with `ε ~ N(0, σ²)`. Show that maximizing the likelihood over `w` is the same as minimizing `Σ(y − Xw)²`, then obtain the normal equations `XᵀXw = Xᵀy`. Also find the maximum likelihood estimate of `σ²`.
 ---
 # D02 · Least squares as maximum likelihood
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d02--least-squares-as-maximum-likelihood). Related code: S2.01, S1.15.
+Row and **Derive:** statement: [README.md](../README.md#week-3--days-15-21--part-a-linear-models-knn-naive-bayes-k-means). Related code: S2.01, S1.15.
+
+## The target
+
+**Intuition:** Gaussian noise means large errors are penalized quadratically. Maximizing likelihood and minimizing squared error are the same problem.
+
+**Step people usually fake:** Differentiating a quadratic form with respect to a vector, and dropping terms that do not depend on `w`. Also state when `XᵀX` is invertible.
+
+**Check:** Points `(1, 2), (2, 3), (3, 5)` give slope 1.5 and intercept about 0.333. Your general formula should reproduce that.
 
 ## Derivation
 

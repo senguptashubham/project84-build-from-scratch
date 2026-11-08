@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D06
-description: For centered data with covariance `Σ`, maximize `wᵀΣw` subject to `‖w‖ = 1` using a Lagrange multiplier. Show the solution is the eigenvector with the largest eigenvalue, and link it to the SVD of the data matrix.
 ---
 # D06 · PCA from maximum variance
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d06--pca-from-maximum-variance). Related code: S2.10.
+Row and **Derive:** statement: [README.md](../README.md#week-4--days-22-28--part-b-trees-boosting-pca-and-imbalanced-data). Related code: S2.10.
+
+## The target
+
+**Intuition:** The first principal component is the direction in which the data spreads out most. The eigenvalue is exactly the variance along it.
+
+**Step people usually fake:** Why the unit-norm constraint is needed at all (without it the problem is unbounded). Also why the data must be centered first, and where the `n − 1` factor comes from.
+
+**Check:** Points on the line `y = x` should give a first component along `(1, 1)/√2` and zero variance on the second.
 
 ## Derivation
 

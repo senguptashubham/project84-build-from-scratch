@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D04
-description: For `y = f(x) + ε` with `E[ε] = 0` and `Var(ε) = σ²`, show that the expected squared error of an estimator `f̂` at a point is `bias² + variance + σ²`.
 ---
 # D04 · Bias-variance decomposition
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d04--bias-variance-decomposition). Related code: S2.04, S7.03.
+Row and **Derive:** statement: [README.md](../README.md#week-3--days-15-21--part-a-linear-models-knn-naive-bayes-k-means). Related code: S2.04, S7.03.
+
+## The target
+
+**Intuition:** Error has three sources: being wrong on average (bias), being unstable across training sets (variance), and irreducible noise.
+
+**Step people usually fake:** Adding and subtracting `E[f̂]`, then showing the cross terms vanish. They vanish because `ε` is independent of `f̂` and because `E[f̂ − E f̂] = 0`.
+
+**Check:** Take the estimator `c·x̄` for the mean `μ` of `n` samples. Compute its bias and variance from your formulas, then confirm them by simulation.
 
 ## Derivation
 
