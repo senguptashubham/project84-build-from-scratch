@@ -43,9 +43,7 @@ def test_the_plan_is_valid_and_the_progress_section_is_current():
     assert master.check_notes(items) == []
     assert sum(r["track"] == "S" for r in items.values()) == 103
     assert sum(r["track"] == "D" for r in items.values()) == 10
-    minutes, log_problems = master.parse_log((ROOT / "log.md").read_text(encoding="utf-8"), items)
-    assert log_problems == []
-    assert master.splice(text, master.render_block(items, weeks, minutes)) == text
+    assert master.splice(text, master.render_block(items, weeks)) == text
 
 
 def test_a_derivation_is_placed_with_the_code_it_relates_to():

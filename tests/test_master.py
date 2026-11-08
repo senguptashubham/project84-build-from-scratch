@@ -1,11 +1,5 @@
 import master
 
-ITEMS = {
-    "S1.01": dict(track="S", title="a", hours=1.5, done=True, week=1, line=""),
-    "S1.02": dict(track="S", title="b", hours=3.5, done=True, week=1, line=""),
-    "S1.03": dict(track="S", title="c", hours=1.5, done=False, week=1, line=""),
-}
-
 PAGE = """\
 # Title
 
@@ -27,33 +21,6 @@ PAGE = """\
 
 - [ ] **S1.03 · Splits.** `L` text
 """
-
-
-def test_empty_minutes_is_unknown_not_zero():
-    minutes, problems = master.parse_log("| Date | ID | Minutes |\n| --- | --- | --- |\n| | S1.01 | |\n", ITEMS)
-    assert minutes == {} and problems == []
-
-
-def test_sessions_for_one_item_add_up():
-    text = "| Date | ID | Minutes |\n| --- | --- | --- |\n| | S1.02 | 60 |\n| | S1.02 | 30 |\n"
-    minutes, problems = master.parse_log(text, ITEMS)
-    assert minutes == {"S1.02": 90.0} and problems == []
-
-
-def test_unknown_id_is_a_problem():
-    minutes, problems = master.parse_log("| Date | ID | Minutes |\n| | S9.99 | 10 |\n", ITEMS)
-    assert minutes == {} and len(problems) == 1 and "S9.99" in problems[0]
-
-
-def test_non_numeric_minutes_is_a_problem():
-    _, problems = master.parse_log("| Date | ID | Minutes |\n| | S1.01 | abc |\n", ITEMS)
-    assert len(problems) == 1
-
-
-def test_log_rejects_nan_inf_and_negative_minutes():
-    text = "| Date | ID | Minutes |\n| | S1.01 | nan |\n| | S1.01 | inf |\n| | S1.01 | -5 |\n| | S1.01 | 30 |\n"
-    minutes, problems = master.parse_log(text, ITEMS)
-    assert minutes == {"S1.01": 30.0} and len(problems) == 3
 
 
 def test_parse_readme_reads_items_weeks_ticks_and_hours():
@@ -85,18 +52,17 @@ def test_a_malformed_item_row_is_reported_not_skipped():
     assert any("X1.03" in p and "malformed" in p for p in problems)
 
 
-def test_progress_ratio_uses_only_finished_rows_with_minutes():
+def test_progress_table_counts_rows_and_planned_hours():
     items, weeks, _ = master.parse_readme(PAGE)
-    # S1.01: 1.5 h planned, 90 min logged -> ratio 1.00. S1.02 is not done here, S1.03 neither.
-    out = master.render_block(items, weeks, {"S1.01": 90.0, "S1.03": 600.0})
-    row = next(l for l in out.splitlines() if l.startswith("| Code |"))
-    assert row == "| Code | 1 / 3 | 1.5 | 11 | 11.5 | 1.00 |"
+    out = master.render_block(items, weeks)
+    assert next(l for l in out.splitlines() if l.startswith("| Code |")) == "| Code | 1 / 3 | 1.5 | 11 |"
+    assert "Actual" not in out
 
 
 def test_render_is_deterministic_and_lists_next_up_in_plan_order():
     items, weeks, _ = master.parse_readme(PAGE)
-    a = master.render_block(items, weeks, {"S1.01": 60.0})
-    assert a == master.render_block(items, weeks, {"S1.01": 60.0})
+    a = master.render_block(items, weeks)
+    assert a == master.render_block(items, weeks)
     nxt = a.split("**Next up**")[1].split("**Plan by week**")[0]
     assert [l.split("**")[1] for l in nxt.splitlines() if l[:2] in ("1.", "2.", "3.")] == ["S1.02", "D01", "S1.03"]
 
@@ -126,3 +92,12 @@ def test_check_notes_requires_one_note_file_and_a_matching_link(tmp_path):
     (tmp_path / "D01-y.md").unlink()
     (tmp_path / "D01-x.md").rename(tmp_path / "D01-renamed.md")
     assert master.check_notes(items, tmp_path) == ["D01 should link derivation/D01-renamed.md"]
+
+
+def test_commit_days_counts_commits_per_day(monkeypatch):
+    class R:
+        stdout = " ".join(["2026-11-08", "2026-11-08", "2026-11-06"])
+
+    monkeypatch.setattr(master.subprocess, "run", lambda *a, **k: R())
+    counts = master.commit_days(28)
+    assert counts[master.date(2026, 11, 8)] == 2 and counts[master.date(2026, 11, 6)] == 1

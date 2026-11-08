@@ -21,23 +21,23 @@ Data structures and algorithms. Many companies, especially in India, still open 
 1. Open this page and take the first row under **Next up**. Items are listed in the order to do them, week by week, and the order is the point.
 2. Read just enough to solve it, from whatever book or paper you like. No notes are required.
 3. Stuck? Follow Rule 2. Aim for one commit a day that moves the item forward (Rule 5).
-4. When an item is done, tick its box here and add a line to `log.md` with your minutes (`Minutes` empty means unknown). The commit hook refreshes the Progress section below on every commit.
+4. When an item is done, tick its box here. The commit hook refreshes the Progress section below on every commit. Your commits are the daily record; `python master.py --days` shows which days you worked and your streak. Nothing else to log.
 5. The last 1-2 days of each week are for the checkpoint and the rewrites: run `pytest` on that sprint's folder and fix anything that broke, then redo the week's flagged items from blank files (Rule 3).
 6. Missing a day is fine. Finishing is what matters. On a bad day, 25 minutes on the current item still counts as a session. Unfinished rows slide into the next week; nothing is dropped.
 
-**Calibrate early.** After S1.04-S1.07, look at the *Actual / planned* column in the Progress table. If it is 1.5 or more, treat every week's hours as 1.5 times larger and start using the *If you fall behind* lines from Sprint 1 instead of waiting for Sprint 3.
+**Calibrate early.** After the first two weeks, count how many rows slid into the next week. If it is more than one in three, treat every week as 1.5 times longer and start using the *If you fall behind* lines from Sprint 1 instead of waiting for Sprint 3.
 
 ## Progress
 
 <!-- progress:start -->
 
-| Track | Rows done | Hours done | Hours in plan | Actual hours logged | Actual / planned |
-| --- | --- | --- | --- | --- | --- |
-| Code | 5 / 103 | 7.5 | 369.5 | 0 | - |
-| Derivations | 0 / 10 | 0 | 13.5 | 0 | - |
-| **All** | **5 / 113** | **7.5** | **383** | **0** | **-** |
+| Track | Rows done | Hours done | Hours in plan |
+| --- | --- | --- | --- |
+| Code | 5 / 103 | 7.5 | 369.5 |
+| Derivations | 0 / 10 | 0 | 13.5 |
+| **All** | **5 / 113** | **7.5** | **383** |
 
-*Actual / planned* compares logged time with the size tags, for finished rows that have minutes in `log.md`.
+Hours come from the size tags and are planning numbers only; nothing is timed.
 
 **Next up** (the next 3 unticked rows in plan order, across both tracks):
 
@@ -141,8 +141,7 @@ Weeks 1-12 are seven days; weeks 13-18 are six. With six days, expect to slide a
 
 ```
 README.md                this page: rules, progress, and every item in order
-master.py                refreshes the Progress section from the checkboxes
-log.md                   your minutes per item (read by master.py)
+master.py                refreshes the Progress section from the checkboxes; --days shows your commit days
 tests/                   tests for master.py and for the page's links
 bootstrap.py             one-time setup after cloning (enables the hook)
 .githooks/pre-commit     runs master.py on every commit

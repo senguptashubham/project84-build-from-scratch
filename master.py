@@ -9,18 +9,19 @@ inside `## Sprint N` sections. Everything between the progress markers is genera
 Usage (run from anywhere; paths are relative to this file):
     python master.py            refresh the Progress section in place
     python master.py --check    validate only; exit 1 on any problem, or if the section is stale
+    python master.py --days     show which days you committed, from git history (read-only, nothing to log)
 
-Time log:  log.md, one row per work session: | Date | ID | Minutes |  (empty Minutes = unknown)
 Notes:     derivation/D<nn>-<title>.md, one per derivation; its row links to it
 """
-import math
 import re
+import subprocess
 import sys
+from collections import Counter
+from datetime import date, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 README = HERE / "README.md"
-LOG = HERE / "log.md"
 DERIV = HERE / "derivation"
 START, END = "<!-- progress:start -->", "<!-- progress:end -->"
 SIZE_H = {"S": 1.5, "M": 3.5, "L": 6.0}
@@ -100,38 +101,8 @@ def check_notes(items, deriv_dir=None):
     return problems
 
 
-def parse_log(text, items):
-    """Return (minutes, problems). minutes maps ID -> total logged minutes.
-
-    A row with an empty Minutes cell is unknown, not zero, so it adds nothing.
-    """
-    minutes, problems = {}, []
-    for n, line in enumerate(text.splitlines(), 1):
-        if not line.startswith("|"):
-            continue
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 3 or cells[1] == "ID" or set(cells[1]) <= set("-: "):
-            continue
-        i, mins = cells[1], cells[2]
-        if i not in items:
-            problems.append(f"log.md line {n}: {i!r} is not an item in README.md")
-            continue
-        if mins == "":
-            continue
-        try:
-            value = float(mins)
-        except ValueError:
-            value = math.nan
-        if not math.isfinite(value) or value < 0:
-            problems.append(f"log.md line {n}: Minutes {mins!r} is not a non-negative number")
-            continue
-        minutes[i] = minutes.get(i, 0.0) + value
-    return minutes, problems
-
-
-def render_block(items, weeks, minutes=None):
+def render_block(items, weeks):
     """The generated Progress section: totals per track, next up, and the plan by week."""
-    minutes = minutes or {}
     out = []
     A = out.append
 
@@ -139,28 +110,21 @@ def render_block(items, weeks, minutes=None):
     for tr, name in TRACKS:
         ids = [i for i, r in items.items() if r["track"] == tr]
         done = [i for i in ids if items[i]["done"]]
-        timed = [i for i in done if i in minutes]
         stats[tr] = dict(
             name=name, rows=len(ids), done=len(done),
             hours=sum(items[i]["hours"] for i in ids),
             hours_done=sum(items[i]["hours"] for i in done),
-            actual=sum(minutes.get(i, 0.0) for i in ids) / 60,
-            actual_timed=sum(minutes[i] for i in timed) / 60,
-            planned_timed=sum(items[i]["hours"] for i in timed),
         )
 
-    def ratio(actual, planned):
-        return f"{actual / planned:.2f}" if planned else "-"
-
-    A("| Track | Rows done | Hours done | Hours in plan | Actual hours logged | Actual / planned |")
-    A("| --- | --- | --- | --- | --- | --- |")
+    A("| Track | Rows done | Hours done | Hours in plan |")
+    A("| --- | --- | --- | --- |")
     for tr, name in TRACKS:
         s = stats[tr]
-        A(f"| {name} | {s['done']} / {s['rows']} | {fmt(s['hours_done'])} | {fmt(s['hours'])} | {fmt(round(s['actual'], 1))} | {ratio(s['actual_timed'], s['planned_timed'])} |")
+        A(f"| {name} | {s['done']} / {s['rows']} | {fmt(s['hours_done'])} | {fmt(s['hours'])} |")
     tot = lambda k: sum(s[k] for s in stats.values())
-    A(f"| **All** | **{tot('done')} / {tot('rows')}** | **{fmt(tot('hours_done'))}** | **{fmt(tot('hours'))}** | **{fmt(round(tot('actual'), 1))}** | **{ratio(tot('actual_timed'), tot('planned_timed'))}** |")
+    A(f"| **All** | **{tot('done')} / {tot('rows')}** | **{fmt(tot('hours_done'))}** | **{fmt(tot('hours'))}** |")
     A("")
-    A("*Actual / planned* compares logged time with the size tags, for finished rows that have minutes in `log.md`.")
+    A("Hours come from the size tags and are planning numbers only; nothing is timed.")
     A("")
 
     A(f"**Next up** (the next {NEXT_UP} unticked rows in plan order, across both tracks):")
@@ -184,6 +148,31 @@ def render_block(items, weeks, minutes=None):
     return "\n".join(out)
 
 
+def commit_days(since_days=28):
+    """Return {date: commit count} for the last `since_days` days, read from git history."""
+    since = (date.today() - timedelta(days=since_days - 1)).isoformat()
+    out = subprocess.run(["git", "log", f"--since={since}", "--format=%ad", "--date=short"],
+                         cwd=HERE, capture_output=True, text=True, encoding="utf-8", check=True).stdout
+    return Counter(date.fromisoformat(d) for d in out.split())
+
+
+def show_days(since_days=28):
+    """Print one line per day: commits made, newest first, plus the current streak."""
+    counts = commit_days(since_days)
+    today = date.today()
+    streak = 0
+    day = today if counts.get(today) else today - timedelta(days=1)
+    while counts.get(day):
+        streak += 1
+        day -= timedelta(days=1)
+    active = sum(1 for v in counts.values() if v)
+    print(f"Last {since_days} days: {active} with a commit. Current streak: {streak}.")
+    for k in range(since_days):
+        d = today - timedelta(days=k)
+        n = counts.get(d, 0)
+        print(f"{d.isoformat()} {d.strftime('%a')}  {'#' * n if n else '.'}")
+
+
 def splice(text, block):
     """Put `block` between the progress markers, or return None if the markers are missing or misplaced."""
     a, b = text.find(START), text.find(END)
@@ -195,15 +184,16 @@ def splice(text, block):
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")  # a non-ASCII log entry must not crash a cp1252 console
+    if "--days" in sys.argv:
+        show_days()
+        return
     check = "--check" in sys.argv
     text = README.read_text(encoding="utf-8")
     items, weeks, problems = parse_readme(text)
     problems += check_notes(items)
-    minutes, log_problems = parse_log(LOG.read_text(encoding="utf-8") if LOG.exists() else "", items)
-    problems += log_problems
     new = None
     if not problems:
-        new = splice(text, render_block(items, weeks, minutes))
+        new = splice(text, render_block(items, weeks))
         if new is None:
             problems.append(f"README.md needs the markers {START} and {END} (in that order) under '## Progress'")
         elif check and new != text:
