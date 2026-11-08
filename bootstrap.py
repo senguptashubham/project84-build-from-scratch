@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One-time setup after cloning: enable the repo's git hooks.
 
-    python bootstrap.py            enable hooks, check the trackers
+    python bootstrap.py            enable hooks, check README.md
     python bootstrap.py --install  also pip install -r requirements.txt
 
 Needs only the standard library.

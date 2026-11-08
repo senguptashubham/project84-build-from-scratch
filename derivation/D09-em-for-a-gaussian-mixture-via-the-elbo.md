@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D09
-description: For a latent variable `z`, show that `log p(x | θ) = ELBO(q, θ) + KL(q ‖ p(z | x, θ))` using Jensen's inequality. Show that setting `q` to the posterior (the responsibilities) closes the gap. Then derive the M-step updates for the means, covariances and mixing weights, using a Lagrange multiplier for the weights.
 ---
 # D09 · EM for a Gaussian mixture, via the ELBO
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d09--em-for-a-gaussian-mixture-via-the-elbo). Related code: S7.07.
+Row and **Derive:** statement: [README.md](../README.md#week-14--days-91-96--part-b-iterative-fitting-and-representations). Related code: S7.07.
+
+## The target
+
+**Intuition:** EM repeatedly builds a lower bound that touches the true likelihood at the current parameters, then maximizes it. The likelihood can never go down.
+
+**Step people usually fake:** Introducing `q(z)` and applying Jensen. The fact that the gap is exactly a KL divergence is what justifies the E-step choice. The Lagrange multiplier for the mixing weights summing to 1 is also commonly skipped.
+
+**Check:** Your S7.07 log-likelihood must never decrease between iterations. That is the check on your algebra.
 
 ## Derivation
 

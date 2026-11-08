@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D03
-description: With `p = σ(wᵀx)` and log-loss, show the gradient is `(p − y)x` per example. Then derive the Hessian `Σ p(1−p) x xᵀ = XᵀWX`, and show it is positive semi-definite, so the loss is convex.
 ---
 # D03 · Logistic regression: gradient and Hessian
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d03--logistic-regression-gradient-and-hessian). Related code: S2.03, S7.06.
+Row and **Derive:** statement: [README.md](../README.md#week-3--days-15-21--part-a-linear-models-knn-naive-bayes-k-means). Related code: S2.03, S7.06.
+
+## The target
+
+**Intuition:** The gradient has the same shape as in linear regression, error times input. The Hessian shows the loss curves most where the model is least certain (`p` near 0.5).
+
+**Step people usually fake:** `σ′ = σ(1−σ)` cancelling cleanly in the chain rule. Also the convexity proof, which shows `vᵀHv = Σ p(1−p)(xᵀv)² ≥ 0`.
+
+**Check:** One feature with `x = 1`, `w = 0`, `y = 1` gives `p = 0.5`, gradient `−0.5`, Hessian `0.25`.
 
 ## Derivation
 

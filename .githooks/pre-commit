@@ -1,5 +1,5 @@
 #!/bin/sh
-# Refresh README.md from the trackers and stage it; block the commit if the trackers disagree with the sequence.
+# Refresh the Progress section of README.md and assets/progress.svg from the checkboxes and stage them; block the commit if the plan is malformed.
 # Enabled by `python bootstrap.py` (sets core.hooksPath to .githooks).
 cd "$(git rev-parse --show-toplevel)" || exit 1
 py=
@@ -15,4 +15,4 @@ if [ -z "$py" ]; then
   exit 1
 fi
 "$py" master.py || { echo "pre-commit: master.py found problems; commit aborted."; exit 1; }
-git add README.md
+git add README.md assets/progress.svg

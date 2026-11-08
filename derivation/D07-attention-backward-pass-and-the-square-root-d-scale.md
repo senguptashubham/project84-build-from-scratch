@@ -2,11 +2,18 @@
 tags:
   - derivation
 row: D07
-description: For `Y = softmax(QKᵀ/√d) V`, derive the gradients with respect to `V`, `Q` and `K`, including their shapes. Then show why the scale is `1/√d`.
 ---
 # D07 · Attention backward pass and the square-root-d scale
 
-Tracker: [DERIVATION_README.md](DERIVATION_README.md#d07--attention-backward-pass-and-the-square-root-d-scale). Related code: S4.01.
+Row and **Derive:** statement: [README.md](../README.md#week-7--days-43-49--part-a-attention-blocks-and-a-character-gpt). Related code: S4.01.
+
+## The target
+
+**Intuition:** Attention is a softmax-weighted average, so its backward pass is the softmax Jacobian applied row by row, plus matrix transposes. The scale keeps the scores at a stable size so the softmax does not saturate.
+
+**Step people usually fake:** The row-wise softmax Jacobian and getting the transposes and shapes right. For the scale: if the entries of `q` and `k` are independent with zero mean and unit variance, `q·k` has variance `d`, so dividing by `√d` returns it to variance 1.
+
+**Check:** Compare all three gradients against PyTorch autograd on small random tensors.
 
 ## Derivation
 

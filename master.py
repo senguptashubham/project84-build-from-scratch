@@ -1,423 +1,218 @@
 #!/usr/bin/env python3
-"""Refresh README.md (the master sequence) from the three tracker files.
+"""Refresh the Progress section of README.md from the checkboxes in the same file.
 
-README.md owns the sequence: the week blocks and the order of IDs inside them.
-The text above the "## Progress" heading and the License section are hand-written
-and kept as they are. Everything else (titles, hours, optional flags, ticks,
-totals) is copied from the tracker files, so you never edit those by hand.
+README.md is the single source: every item (a code problem `S..` or a derivation `D..`)
+is a checkbox row, listed in the order to do them, grouped under `### Week N` headings
+inside `## Sprint N` sections. Everything between the progress markers is generated here
+(progress, next up, plan by week); the rest is hand-written and left alone.
 
 Usage (run from anywhere; paths are relative to this file):
-    python master.py            refresh README.md in place
-    python master.py --check    validate only; exit 1 on any problem
-    python master.py --sync-notes   copy each theory row's text and each derivation's Derive: line into its note's description: field
+    python master.py            refresh the Progress section in place
+    python master.py --check    validate only; exit 1 on any problem, or if the section is stale
+    python master.py --days     show which days you committed, from git history (read-only, nothing to log)
 
-Trackers:  code/CODE_README.md (S..)  derivation/DERIVATION_README.md (D..)  theory/THEORY_README.md (T..)
-Time log:  log.md, one row per work session: | Date | ID | Minutes |  (empty Minutes = unknown)
-Notes:     theory/notes/<area>/T<row>-<title>.md and derivation/D<nn>-<title>.md, one per row, each with a "row: .." line;
-           item titles on the README link to them
+Notes:     derivation/D<nn>-<title>.md, one per derivation; its row links to it
 """
-import json
-import math
 import re
+import subprocess
 import sys
+from collections import Counter
+from datetime import date, timedelta
 from pathlib import Path
 
+import progress_chart
+
 HERE = Path(__file__).resolve().parent
-MASTER = HERE / "README.md"
-LOG = HERE / "log.md"
-NOTES = HERE / "theory" / "notes"
-NO_NOTES = {"T7.6"}  # topic rows that deliberately have no notes chapter
+README = HERE / "README.md"
+DERIV = HERE / "derivation"
+CHART = HERE / "assets" / "progress.svg"
+START, END = "<!-- progress:start -->", "<!-- progress:end -->"
 SIZE_H = {"S": 1.5, "M": 3.5, "L": 6.0}
-TRACKS = [("S", "Code"), ("T", "Theory"), ("D", "Derivations")]
+TRACKS = [("S", "Code"), ("D", "Derivations")]
 TRACK_NAME = dict(TRACKS)
 NEXT_UP = 3
-ID_RE = r"[SDT]\d[0-9.SQ]*"
+
+ITEM_RE = re.compile(r"^- \[( |x|X)\] \*\*([SD]\d[0-9.]*)( ★)? · (.*?)\*\* (?:`([SML])`|`([\d.]+) h`)", re.M)
+SPRINT_RE = re.compile(r"^## Sprint (\d) · .*$")
+WEEK_RE = re.compile(r"^### Week (\d+) · Days (\S+) · Part ([AB]): (.*)$")
 
 
 def fmt(x):
     return f"{x:g}"
 
 
-def parse_trackers():
-    items, problems = {}, []
-
-    def add(i, rec, src):
-        if i in items:
-            problems.append(f"duplicate ID {i} in {src}")
-        items[i] = rec
-
-    # Code: README.md
-    text = (HERE / "code" / "CODE_README.md").read_text(encoding="utf-8")
-    pat = re.compile(r"^- \[( |x|X)\] \*\*(S\d\.\d\d)( ★)? · (.*?)\*\* `([SML])`", re.M)
-    for m in pat.finditer(text):
-        title = m.group(4).rstrip(". ")
-        if m.group(3):
-            title += " ★"
-        add(m.group(2), dict(track="S", title=title, hours=SIZE_H[m.group(5)], opt=False, done=m.group(1) in "xX"), "code/CODE_README.md")
-    # Others
-    pat2 = re.compile(r"^- \[( |x|X)\] \*\*(" + ID_RE + r") · (.*?)\*\* (`opt` )?`([\d.]+) h`", re.M)
-    for fname, letter in (("derivation/DERIVATION_README.md", "D"), ("theory/THEORY_README.md", "T")):
-        text = (HERE / fname).read_text(encoding="utf-8")
-        for m in pat2.finditer(text):
-            i = m.group(2)
-            if i[0] != letter:
-                problems.append(f"{i} in {fname} has the wrong prefix (expected {letter})")
-            add(i, dict(track=i[0], title=m.group(3).rstrip(". "), hours=float(m.group(5)), opt=bool(m.group(4)), done=m.group(1) in "xX"), fname)
-    return items, problems
-
-
-def parse_log(text, items):
-    """Return (minutes, problems). minutes maps ID -> total logged minutes.
-
-    A row with an empty Minutes cell is unknown, not zero, so it adds nothing.
-    """
-    minutes, problems = {}, []
-    for n, line in enumerate(text.splitlines(), 1):
-        if not line.startswith("|"):
-            continue
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 3 or cells[1] == "ID" or set(cells[1]) <= set("-: "):
-            continue
-        i, mins = cells[1], cells[2]
-        if i not in items:
-            problems.append(f"log.md line {n}: {i!r} is not in any tracker file")
-            continue
-        if mins == "":
-            continue
-        try:
-            value = float(mins)
-        except ValueError:
-            value = math.nan
-        if not math.isfinite(value) or value < 0:
-            problems.append(f"log.md line {n}: Minutes {mins!r} is not a non-negative number")
-            continue
-        minutes[i] = minutes.get(i, 0.0) + value
-    return minutes, problems
-
-
-def slug(heading):
-    """GitHub-style anchor for a Markdown heading."""
-    h = re.sub(r"[^\w\- ]", "", heading.strip().lower().replace("`", "").replace("*", ""))
-    return h.replace(" ", "-")
-
-
-def tracker_descriptions(tracker_text):
-    """Map each theory row to the description text after its hours tag, without the trailing Notes: link."""
-    pat = r"^- \[.\] \*\*(T\d\.\d+) · .*?\*\* (?:`opt` )?`[\d.]+ h` (.*?)(?: Notes: \[[^\]]*\]\([^)]*\)\.)?$"
-    return {m.group(1): m.group(2).strip() for m in re.finditer(pat, tracker_text, re.M)}
-
-
-def derivation_descriptions(deriv_text):
-    """Map each derivation to the text of its '**Derive:**' line."""
-    out = {}
-    for m in re.finditer(r"^## (D\d\d) · .*?\n(.*?)(?=^## D\d\d ·|\Z)", deriv_text, re.M | re.S):
-        d = re.search(r"^\*\*Derive:\*\* (.*)$", m.group(2), re.M)
-        if d:
-            out[m.group(1)] = d.group(1).strip()
-    return out
-
-
-def yaml_scalar(text):
-    """A one-line YAML value: plain when that is safe, otherwise double-quoted."""
-    risky = re.search(r": |\s#", text) or text[:1] in "&*!|>'\"%@`[]{},#-?" or text != text.strip() or text.endswith(":")
-    return json.dumps(text, ensure_ascii=False) if risky else text
-
-
-def note_description(note_text):
-    """The value of a note's description: property, tolerating the shapes an editor may re-save it in
-    (quoted, wrapped over several lines, or a folded/literal block)."""
-    front = re.match(r"^---\n(.*?)\n---\n", note_text.replace("\r\n", "\n"), re.S)
-    m = re.search(r"^description:[ \t]*(.*(?:\n[ \t]+.*)*)", front.group(1), re.M) if front else None
-    if not m:
-        return None
-    head, *rest = m.group(1).split("\n")
-    head = head.strip()
-    if head in (">", ">-", ">+", "|", "|-", "|+"):
-        return (" " if head[0] == ">" else "\n").join(line.strip() for line in rest).strip()
-    value = " ".join([head] + [line.strip() for line in rest]).strip()
-    if value.startswith('"'):
-        try:
-            return json.loads(value)
-        except ValueError:
-            return value
-    if len(value) > 1 and value[0] == "'" and value[-1] == "'":
-        return value[1:-1].replace("''", "'")
-    return value
-
-
-def check_descriptions(notes, want, source="theory/THEORY_README.md"):
-    """Each note's description: field must equal the text it mirrors (a row, or a derivation's Derive: line)."""
-    problems = []
-    for row, rel in notes.items():
-        have = note_description((HERE / rel).read_text(encoding="utf-8"))
-        if row in want and have != want[row]:
-            problems.append(f"{rel}: description differs from {source} (run: python master.py --sync-notes)")
-    return problems
-
-
-def sync_descriptions(notes, want):
-    """Rewrite each note's description: line from the text it mirrors. Returns the files that changed."""
-    changed = []
-    for row, rel in notes.items():
-        path = HERE / rel
-        text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
-        front = re.match(r"^---\n(.*?)\n---\n", text, re.S)
-        if row not in want or not front:
-            continue
-        line = f"description: {yaml_scalar(want[row])}"
-        if re.search(r"^description:", front.group(1), re.M):
-            new_front = re.sub(r"^description:.*(?:\n[ \t]+.*)*", lambda _: line, front.group(1), count=1, flags=re.M)
-        else:
-            new_front = re.sub(r"^(row: .*)$", lambda m: m.group(1) + "\n" + line, front.group(1), count=1, flags=re.M)
-        new_text = "---\n" + new_front + "\n---\n" + text[front.end():]
-        if new_text != text:
-            path.write_text(new_text, encoding="utf-8", newline="\n")
-            changed.append(rel)
-    return changed
-
-
-def parse_notes(files=None, row_pat=r"T\d\.\d+"):
-    """Return ({row: notes path relative to the repo root}, problems), from each note file's row: line."""
-    links, problems = {}, []
-    for f in sorted(NOTES.glob("*/*.md")) if files is None else files:
-        rel = f.relative_to(HERE).as_posix()
-        m = re.search(rf"^row: ({row_pat})\s*$", f.read_text(encoding="utf-8"), re.M)
-        if not m:
-            # a file that is not named like a note (a scratch page, say) is ignored; a note missing its row: line is not
-            if re.match(rf"({row_pat})-", f.name):
-                problems.append(f"{rel} has no 'row: ..' line")
-            continue
-        row = m.group(1)
-        if not f.name.startswith(row + "-"):
-            problems.append(f"{rel} should start with its row ID {row}-")
-        if row in links:
-            problems.append(f"{row} is claimed by two note files")
-        links[row] = rel
-    return links, problems
-
-
-def check_links(items, notes, tracker_text, tracker_file):
-    """Each note file must belong to a tracker row, and that row must link to it."""
-    problems = []
-    base = tracker_file.rsplit("/", 1)[0] + "/"
-    for row, rel in notes.items():
-        if row not in items:
-            problems.append(f"{rel} lists {row}, which is not a row in {tracker_file}")
-            continue
-        line = next((l for l in tracker_text.splitlines() if l.startswith("- [") and f"**{row} \u00b7 " in l), "")
-        want = "(" + rel.split(base, 1)[1] + ")"
-        if want not in line:
-            problems.append(f"{tracker_file} row {row} should link {want[1:-1]}")
-    return problems
-
-
-def check_derivations(items, notes, text):
-    problems = check_links(items, notes, text, "derivation/DERIVATION_README.md")
-    for row in items:
-        if re.fullmatch(r"D\d\d", row) and row not in notes:
-            problems.append(f"{row} has no note file (add derivation/{row}-<title>.md with a 'row: {row}' line)")
-    return problems
-
-
-def check_notes(items, notes, theory_text):
-    problems = check_links(items, notes, theory_text, "theory/THEORY_README.md")
-    for row in items:
-        if re.fullmatch(r"T\d\.\d+", row) and row not in NO_NOTES and not row.startswith("T9") and row not in notes:
-            problems.append(f"{row} has no notes file (add theory/notes/<area>/{row}-<title>.md with a 'row: {row}' line)")
-    return problems
-
-
-def build_links(items, notes):
-    """Where each plan row's title should point, as paths relative to the repo root."""
-    code = (HERE / "code" / "CODE_README.md").read_text(encoding="utf-8")
-    deriv = (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8")
-    theory = (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8")
-    sprint = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## Sprint (\d) \u00b7 .*$", code, re.M)}
-    derive = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## (D\d\d) \u00b7 .*$", deriv, re.M)}
-    module = {m.group(1): slug(m.group(0)[3:]) for m in re.finditer(r"^## M(\d)\. .*$", theory, re.M)}
-    links = {}
-    for i, r in items.items():
-        if r["track"] == "S" and i[1] in sprint:
-            links[i] = f"code/CODE_README.md#{sprint[i[1]]}"
-        elif r["track"] == "D" and (i in notes or i in derive):
-            links[i] = notes.get(i) or f"derivation/DERIVATION_README.md#{derive[i]}"
-        elif r["track"] == "T":
-            if i in notes:
-                links[i] = notes[i]
-            elif i[1] in module:
-                links[i] = f"theory/THEORY_README.md#{module[i[1]]}"
-    return links
-
-
-def parse_master():
-    """Return list of weeks: dict(header=str, ids=[...])."""
-    if not MASTER.exists():
-        raise SystemExit("README.md not found")
-    weeks, cur = [], None
-    for line in MASTER.read_text(encoding="utf-8").splitlines():
-        if line.startswith("## Week "):
-            cur = dict(header=line[3:].strip(), ids=[])
-            weeks.append(cur)
-            continue
-        if cur is None:
-            continue
-        m = re.match(r"^\|\s*(?:☑|☐)?\s*\|\s*(" + ID_RE + r")\s*\|", line)
+def parse_readme(text):
+    """Return (items, weeks, problems). items: ID -> record; weeks: list of dict(n, days, sprint, part, focus, ids)."""
+    items, weeks, problems = {}, [], []
+    sprint, week = None, None
+    for line in text.splitlines():
+        m = SPRINT_RE.match(line)
         if m:
-            cur["ids"].append(m.group(1))
-    return weeks
+            sprint, week = m.group(1), None
+            continue
+        m = WEEK_RE.match(line)
+        if m:
+            if sprint is None:
+                problems.append(f"{line.strip()!r} is not inside a Sprint section")
+            week = dict(n=int(m.group(1)), days=m.group(2), sprint=sprint, part=m.group(3), focus=m.group(4).strip(), ids=[])
+            weeks.append(week)
+            continue
+        m = ITEM_RE.match(line)
+        if not m:
+            if re.match(r"^- \[( |x|X)\] \*\*", line):
+                problems.append(f"malformed item row (ID, size or hours tag): {line[:60]!r}")
+            continue
+        done, iid, star, title, size, hours = m.groups()
+        track = iid[0]
+        if week is None:
+            problems.append(f"{iid} is not under a '### Week N' heading")
+            continue
+        if iid in items:
+            problems.append(f"{iid} appears twice (Week {items[iid]['week']} and Week {week['n']})")
+            continue
+        if track == "S" and (not re.fullmatch(r"S\d\.\d\d", iid) or not size):
+            problems.append(f"{iid} needs an ID like S1.01 and a size tag S, M or L")
+        if track == "D" and (not re.fullmatch(r"D\d\d", iid) or not hours):
+            problems.append(f"{iid} needs an ID like D01 and an hours tag such as `1.5 h`")
+        if track == "S" and iid[1] != sprint:
+            problems.append(f"{iid} is listed under Sprint {sprint}")
+        title = title.rstrip(". ") + (" ★" if star else "")
+        h = SIZE_H[size] if size else float(hours or 0)
+        items[iid] = dict(track=track, title=title, hours=h, done=done in "xX", week=week["n"], line=line)
+        week["ids"].append(iid)
+    for a, b in zip(weeks, weeks[1:]):
+        if b["n"] != a["n"] + 1:
+            problems.append(f"Week {b['n']} follows Week {a['n']}")
+    for w in weeks:
+        if not w["ids"]:
+            problems.append(f"Week {w['n']} has no items")
+    return items, weeks, problems
 
 
-def validate(items, weeks):
+def check_notes(items, deriv_dir=None):
+    """Each derivation needs exactly one note file D<nn>-*.md, and its row must link to it."""
+    deriv_dir = deriv_dir or DERIV
     problems = []
-    seen = {}
-    for wi, w in enumerate(weeks, 1):
-        for i in w["ids"]:
-            if i in seen:
-                problems.append(f"{i} appears in Week {seen[i]} and Week {wi}")
-            seen[i] = wi
-            if i not in items:
-                problems.append(f"{i} (Week {wi}) is not in any tracker file")
-    for i in items:
-        if i not in seen:
-            problems.append(f"{i} is in a tracker but not in README.md")
+    for iid, r in items.items():
+        if r["track"] != "D":
+            continue
+        found = sorted(deriv_dir.glob(f"{iid}-*.md"))
+        if len(found) != 1:
+            problems.append(f"{iid} needs exactly one note file {iid}-<title>.md in derivation/ (found {len(found)})")
+        elif f"(derivation/{found[0].name})" not in r["line"]:
+            problems.append(f"{iid} should link derivation/{found[0].name}")
     return problems
 
 
-def render(items, weeks, intro, outro, minutes=None, links=None):
-    minutes = minutes or {}
-    links = links or {}
+def render_block(items, weeks):
+    """The generated Progress section: totals per track, next up, and the plan by week."""
     out = []
     A = out.append
-    A(intro.rstrip("\n"))
-    A("")
 
-    # progress
     stats = {}
     for tr, name in TRACKS:
         ids = [i for i, r in items.items() if r["track"] == tr]
-        req = [i for i in ids if not items[i]["opt"]]
-        done_req = [i for i in req if items[i]["done"]]
-        done_all = [i for i in ids if items[i]["done"]]
-        timed = [i for i in done_all if i in minutes]
-        planned_timed = sum(items[i]["hours"] for i in timed)
+        done = [i for i in ids if items[i]["done"]]
         stats[tr] = dict(
-            name=name, req=len(req), done_req=len(done_req),
+            name=name, rows=len(ids), done=len(done),
             hours=sum(items[i]["hours"] for i in ids),
-            hours_done=sum(items[i]["hours"] for i in done_all),
-            actual=sum(minutes.get(i, 0.0) for i in ids) / 60,
-            actual_timed=sum(minutes[i] for i in timed) / 60,
-            planned_timed=planned_timed,
+            hours_done=sum(items[i]["hours"] for i in done),
         )
-    A("## Progress")
-    A("")
-    A("| Track | Required rows done | Hours done | Hours in plan | Actual hours logged | Actual / planned |")
-    A("| --- | --- | --- | --- | --- | --- |")
 
-    def ratio(actual, planned):
-        return f"{actual / planned:.2f}" if planned else "-"
-
-    for tr, name in TRACKS:
-        s = stats[tr]
-        A(f"| {name} | {s['done_req']} / {s['req']} | {fmt(s['hours_done'])} | {fmt(s['hours'])} | {fmt(round(s['actual'], 1))} | {ratio(s['actual_timed'], s['planned_timed'])} |")
-    tot_h = sum(s["hours"] for s in stats.values())
-    tot_d = sum(s["hours_done"] for s in stats.values())
-    tot_a = sum(s["actual"] for s in stats.values())
-    tot_at = sum(s["actual_timed"] for s in stats.values())
-    tot_pt = sum(s["planned_timed"] for s in stats.values())
-    A(f"| **All** | **{sum(s['done_req'] for s in stats.values())} / {sum(s['req'] for s in stats.values())}** | **{fmt(tot_d)}** | **{fmt(tot_h)}** | **{fmt(round(tot_a, 1))}** | **{ratio(tot_at, tot_pt)}** |")
+    tot = lambda k: sum(s[k] for s in stats.values())
+    A("![Progress: " + f"{tot('done')} of {tot('rows')} rows done" + "](assets/progress.svg)")
     A("")
-    A("*Actual / planned* compares logged time with the size tags, for finished rows that have minutes in `log.md`.")
+    A("Hours come from the size tags and are planning numbers only; nothing is timed.")
     A("")
 
-    # next up
-    A("## Next up")
+    A(f"**Next up** (the next {NEXT_UP} unticked rows in plan order, across both tracks):")
     A("")
-    week_of = {}
-    order = []
-    for wi, w in enumerate(weeks, 1):
-        for i in w["ids"]:
-            week_of[i] = wi
-            order.append(i)
-    A(f"The next {NEXT_UP} unticked rows in plan order, across all three tracks. Optional rows are skipped.")
-    A("")
-    upcoming = [i for i in order if i in items and not items[i]["done"] and not items[i]["opt"]][:NEXT_UP]
+    order = [i for w in weeks for i in w["ids"]]
+    upcoming = [i for i in order if not items[i]["done"]][:NEXT_UP]
     for n, i in enumerate(upcoming, 1):
-        A(f"{n}. **{i}** · {items[i]['title']} ({TRACK_NAME[items[i]['track']]}, Week {week_of[i]})")
+        A(f"{n}. **{i}** · {items[i]['title']} ({TRACK_NAME[items[i]['track']]}, Week {items[i]['week']})")
     if not upcoming:
-        A("All required rows are done.")
+        A("All rows are done.")
     A("")
 
-    # weeks
-    for wi, w in enumerate(weeks, 1):
-        A(f"## {w['header']}")
-        A("")
-        by = {tr: 0.0 for tr, _ in TRACKS}
-        for i in w["ids"]:
-            if i in items:
-                by[items[i]["track"]] += items[i]["hours"]
-        total = sum(by.values())
-        parts = " · ".join(f"{name} {fmt(by[tr])}" for tr, name in TRACKS)
-        A(f"**Hours:** {fmt(total)} ({parts})")
-        A("")
-        A("| Done | ID | Item | Hours |")
-        A("| --- | --- | --- | --- |")
-        for i in w["ids"]:
-            r = items.get(i)
-            if r is None:
-                A(f"| ? | {i} | **missing from trackers** | |")
-                continue
-            mark = "☑" if r["done"] else "☐"
-            title = f"[{r['title']}]({links[i]})" if i in links else r["title"]
-            title += " *(optional)*" if r["opt"] else ""
-            A(f"| {mark} | {i} | {title} | {fmt(r['hours'])} |")
-        A("")
-    A("---")
+    A("**Plan by week**")
     A("")
-    A("Generated by `master.py`. Edit the week blocks and the order of rows to change the sequence; everything below the Progress heading is overwritten on refresh.")
-    A("")
-    A(outro.strip("\n"))
-    A("")
+    A("| Week | Days | Sprint · Part | Focus | Rows | Hours | Done |")
+    A("| --- | --- | --- | --- | --- | --- | --- |")
+    for w in weeks:
+        hours = sum(items[i]["hours"] for i in w["ids"])
+        done = sum(items[i]["done"] for i in w["ids"])
+        A(f"| {w['n']} | {w['days']} | {w['sprint']} · {w['part']} | {w['focus']} | {len(w['ids'])} | {fmt(hours)} | {done} / {len(w['ids'])} |")
     return "\n".join(out)
+
+
+def commit_days(since_days=28):
+    """Return {date: commit count} for the last `since_days` days, read from git history."""
+    since = (date.today() - timedelta(days=since_days - 1)).isoformat()
+    out = subprocess.run(["git", "log", f"--since={since}", "--format=%ad", "--date=short"],
+                         cwd=HERE, capture_output=True, text=True, encoding="utf-8", check=True).stdout
+    return Counter(date.fromisoformat(d) for d in out.split())
+
+
+def show_days(since_days=28):
+    """Print one line per day: commits made, newest first, plus the current streak."""
+    counts = commit_days(since_days)
+    today = date.today()
+    streak = 0
+    day = today if counts.get(today) else today - timedelta(days=1)
+    while counts.get(day):
+        streak += 1
+        day -= timedelta(days=1)
+    active = sum(1 for v in counts.values() if v)
+    print(f"Last {since_days} days: {active} with a commit. Current streak: {streak}.")
+    for k in range(since_days):
+        d = today - timedelta(days=k)
+        n = counts.get(d, 0)
+        print(f"{d.isoformat()} {d.strftime('%a')}  {'#' * n if n else '.'}")
+
+
+def splice(text, block):
+    """Put `block` between the progress markers, or return None if the markers are missing or misplaced."""
+    a, b = text.find(START), text.find(END)
+    if a < 0 or b < a:
+        return None
+    return text[: a + len(START)] + "\n\n" + block + "\n\n" + text[b:]
 
 
 def main():
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(errors="replace")  # a non-ASCII log entry must not crash a cp1252 console
-    check = "--check" in sys.argv
-    items, problems = parse_trackers()
-    weeks = parse_master()
-    problems += validate(items, weeks)
-    notes, note_problems = parse_notes()
-    theory_text = (HERE / "theory" / "THEORY_README.md").read_text(encoding="utf-8")
-    deriv_text = (HERE / "derivation" / "DERIVATION_README.md").read_text(encoding="utf-8")
-    dnotes, dnote_problems = parse_notes(sorted((HERE / "derivation").glob("D??-*.md")), r"D\d\d")
-    if "--sync-notes" in sys.argv:
-        changed = sync_descriptions(notes, tracker_descriptions(theory_text)) + sync_descriptions(dnotes, derivation_descriptions(deriv_text))
-        print(f"{len(changed)} note description(s) refreshed from the trackers.")
-        for rel in changed:
-            print(" -", rel)
+    if "--days" in sys.argv:
+        show_days()
         return
-    problems += note_problems + check_notes(items, notes, theory_text) + check_descriptions(notes, tracker_descriptions(theory_text))
-    problems += dnote_problems + check_derivations(items, dnotes, deriv_text)
-    problems += check_descriptions(dnotes, derivation_descriptions(deriv_text), "the 'Derive:' line in derivation/DERIVATION_README.md")
-    notes = {**notes, **dnotes}
-    minutes, log_problems = parse_log(LOG.read_text(encoding="utf-8") if LOG.exists() else "", items)
-    problems += log_problems
+    check = "--check" in sys.argv
+    text = README.read_text(encoding="utf-8")
+    items, weeks, problems = parse_readme(text)
+    problems += check_notes(items)
+    new = svg = None
+    if not problems:
+        new = splice(text, render_block(items, weeks))
+        svg = progress_chart.render_svg(items, weeks)
+        if check and (not CHART.exists() or CHART.read_bytes() != svg.encode("utf-8")):
+            problems.append("assets/progress.svg is missing or out of date (run: python master.py)")
+        if new is None:
+            problems.append(f"README.md needs the markers {START} and {END} (in that order) under '## Progress'")
+        elif check and new != text:
+            problems.append("the Progress section of README.md is out of date (run: python master.py)")
     if problems:
         print("Problems found:")
         for p in problems:
             print(" -", p)
-    if check:
-        print("OK" if not problems else "")
-        sys.exit(1 if problems else 0)
-    if problems:
-        print("README.md was not rewritten. Fix the problems above first.")
+        if not check:
+            print("README.md was not rewritten. Fix the problems above first.")
         sys.exit(1)
-    text = MASTER.read_text(encoding="utf-8")
-    intro = text[: text.index("## Progress")]
-    outro = text[text.index("\n## License"):]
-    MASTER.write_text(render(items, weeks, intro, outro, minutes, build_links(items, notes)), encoding="utf-8", newline="\n")
-    print(f"README.md refreshed: {len(items)} rows, {len(weeks)} weeks.")
+    if check:
+        print("OK")
+        return
+    README.write_text(new, encoding="utf-8", newline="\n")
+    CHART.parent.mkdir(exist_ok=True)
+    CHART.write_text(svg, encoding="utf-8", newline="\n")
+    print(f"README.md and assets/progress.svg refreshed: {len(items)} rows, {len(weeks)} weeks.")
 
 
 if __name__ == "__main__":

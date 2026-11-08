@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="410" viewBox="0 0 840 410" role="img" aria-label="Project 84 progress: 5 of 113 rows done, 4 percent">
+<title>Project 84 progress: 5 of 113 rows done, 4 percent</title>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#161b22"/><stop offset="1" stop-color="#0d1117"/></linearGradient>
+<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f368e0"/><stop offset="0.5" stop-color="#54a0ff"/><stop offset="1" stop-color="#1dd1a1"/></linearGradient>
+<linearGradient id="code" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#54a0ff"/><stop offset="1" stop-color="#1dd1a1"/></linearGradient>
+<linearGradient id="der" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f368e0"/><stop offset="1" stop-color="#ff9f43"/></linearGradient>
+<linearGradient id="hrs" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#feca57"/><stop offset="1" stop-color="#ff6b6b"/></linearGradient>
+</defs>
+<rect width="840" height="410" rx="18" fill="url(#bg)"/>
+<g font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<text x="32" y="46" fill="#e6edf3" font-size="24" font-weight="700">Project 84 · progress</text>
+<text x="32" y="70" fill="#8b949e" font-size="14">5 of 113 rows done · 7.5 of 383 planned hours</text>
+<circle cx="130" cy="175" r="64" fill="none" stroke="#21262d" stroke-width="24"/>
+<circle cx="130" cy="175" r="64" fill="none" stroke="url(#ring)" stroke-width="24" stroke-linecap="round" stroke-dasharray="17.8 402.1" transform="rotate(-90 130 175)"/>
+<text x="130" y="183" fill="#e6edf3" font-size="26" font-weight="700" text-anchor="middle">4%</text>
+<text x="130" y="203" fill="#8b949e" font-size="12" text-anchor="middle">rows done</text>
+<text x="270" y="110" fill="#e6edf3" font-size="15" font-weight="600">Code problems</text>
+<text x="800" y="110" fill="#8b949e" font-size="14" text-anchor="end">5 / 103</text>
+<rect x="270" y="120" width="530" height="20" rx="10" fill="#21262d"/>
+<rect x="270" y="120" width="25.7" height="20" rx="10" fill="url(#code)"/>
+<text x="270" y="165" fill="#e6edf3" font-size="15" font-weight="600">Derivations</text>
+<text x="800" y="165" fill="#8b949e" font-size="14" text-anchor="end">0 / 10</text>
+<rect x="270" y="175" width="530" height="20" rx="10" fill="#21262d"/>
+<text x="270" y="220" fill="#e6edf3" font-size="15" font-weight="600">Planned hours covered</text>
+<text x="800" y="220" fill="#8b949e" font-size="14" text-anchor="end">7.5 / 383 h</text>
+<rect x="270" y="230" width="530" height="20" rx="10" fill="#21262d"/>
+<rect x="270" y="230" width="18.0" height="20" rx="10" fill="url(#hrs)"/>
+<text x="32" y="283" fill="#8b949e" font-size="13">Plan by week · column height is planned hours, bright part is done, colour is the sprint</text>
+<rect x="38.6" y="318.1" width="30.0" height="53.9" rx="5" fill="#ff6b6b" fill-opacity="0.25"/>
+<rect x="38.6" y="351.3" width="30.0" height="20.7" rx="5" fill="#ff6b6b"/>
+<text x="53.6" y="390" fill="#8b949e" font-size="11" text-anchor="middle">1</text>
+<rect x="81.7" y="312.6" width="30.0" height="59.4" rx="5" fill="#ff6b6b" fill-opacity="0.25"/>
+<text x="96.7" y="390" fill="#8b949e" font-size="11" text-anchor="middle">2</text>
+<rect x="124.8" y="296.0" width="30.0" height="76.0" rx="5" fill="#ff9f43" fill-opacity="0.25"/>
+<text x="139.8" y="390" fill="#8b949e" font-size="11" text-anchor="middle">3</text>
+<rect x="167.9" y="301.5" width="30.0" height="70.5" rx="5" fill="#ff9f43" fill-opacity="0.25"/>
+<text x="182.9" y="390" fill="#8b949e" font-size="11" text-anchor="middle">4</text>
+<rect x="211.0" y="312.6" width="30.0" height="59.4" rx="5" fill="#feca57" fill-opacity="0.25"/>
+<text x="226.0" y="390" fill="#8b949e" font-size="11" text-anchor="middle">5</text>
+<rect x="254.1" y="309.8" width="30.0" height="62.2" rx="5" fill="#feca57" fill-opacity="0.25"/>
+<text x="269.1" y="390" fill="#8b949e" font-size="11" text-anchor="middle">6</text>
+<rect x="297.2" y="311.2" width="30.0" height="60.8" rx="5" fill="#1dd1a1" fill-opacity="0.25"/>
+<text x="312.2" y="390" fill="#8b949e" font-size="11" text-anchor="middle">7</text>
+<rect x="340.3" y="309.8" width="30.0" height="62.2" rx="5" fill="#1dd1a1" fill-opacity="0.25"/>
+<text x="355.3" y="390" fill="#8b949e" font-size="11" text-anchor="middle">8</text>
+<rect x="383.4" y="312.6" width="30.0" height="59.4" rx="5" fill="#48dbfb" fill-opacity="0.25"/>
+<text x="398.4" y="390" fill="#8b949e" font-size="11" text-anchor="middle">9</text>
+<rect x="426.6" y="319.5" width="30.0" height="52.5" rx="5" fill="#48dbfb" fill-opacity="0.25"/>
+<text x="441.6" y="390" fill="#8b949e" font-size="11" text-anchor="middle">10</text>
+<rect x="469.7" y="319.5" width="30.0" height="52.5" rx="5" fill="#54a0ff" fill-opacity="0.25"/>
+<text x="484.7" y="390" fill="#8b949e" font-size="11" text-anchor="middle">11</text>
+<rect x="512.8" y="312.6" width="30.0" height="59.4" rx="5" fill="#54a0ff" fill-opacity="0.25"/>
+<text x="527.8" y="390" fill="#8b949e" font-size="11" text-anchor="middle">12</text>
+<rect x="555.9" y="316.7" width="30.0" height="55.3" rx="5" fill="#a55eea" fill-opacity="0.25"/>
+<text x="570.9" y="390" fill="#8b949e" font-size="11" text-anchor="middle">13</text>
+<rect x="599.0" y="312.6" width="30.0" height="59.4" rx="5" fill="#a55eea" fill-opacity="0.25"/>
+<text x="614.0" y="390" fill="#8b949e" font-size="11" text-anchor="middle">14</text>
+<rect x="642.1" y="316.7" width="30.0" height="55.3" rx="5" fill="#f368e0" fill-opacity="0.25"/>
+<text x="657.1" y="390" fill="#8b949e" font-size="11" text-anchor="middle">15</text>
+<rect x="685.2" y="318.1" width="30.0" height="53.9" rx="5" fill="#f368e0" fill-opacity="0.25"/>
+<text x="700.2" y="390" fill="#8b949e" font-size="11" text-anchor="middle">16</text>
+<rect x="728.3" y="315.3" width="30.0" height="56.7" rx="5" fill="#ff7aa2" fill-opacity="0.25"/>
+<text x="743.3" y="390" fill="#8b949e" font-size="11" text-anchor="middle">17</text>
+<rect x="771.4" y="322.3" width="30.0" height="49.7" rx="5" fill="#ff7aa2" fill-opacity="0.25"/>
+<text x="786.4" y="390" fill="#8b949e" font-size="11" text-anchor="middle">18</text>
+</g>
+</svg>
