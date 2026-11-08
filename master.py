@@ -238,7 +238,7 @@ def parse_master():
             continue
         if cur is None:
             continue
-        # any letter prefix, so a stale row (an old T-row, say) is reported by validate() instead of silently dropped
+        # any letter prefix, so a row with an unknown ID is reported by validate() instead of silently dropped
         m = re.match(r"^\|\s*(?:☑|☐)?\s*\|\s*([A-Z]\d[0-9.A-Z]*)\s*\|", line)
         if m:
             cur["ids"].append(m.group(1))
